@@ -1,6 +1,8 @@
 /**
  * used for calculating raid check p
  * remember cflags += -max2
+ * my test env
+ * CPU: fx8300 3.3GHz
  */
 
 #include <stdio.h>
@@ -33,6 +35,8 @@ void comp_avx2()
     size_t nCycle;
     size_t cycle_i;
 
+    unsigned char **Lut;
+
     nDisk = 4;
     bufLen = 1024*64; // 64 KB per disk buffer
 
@@ -50,8 +54,7 @@ void comp_avx2()
     }
     putchar('\n');
 
-    nCycle = 1024*256;
-//    nCycle = 1024*256;
+    nCycle = 1024*512;
 
     // use avx2
     start = clock();
@@ -60,24 +63,40 @@ void comp_avx2()
     }
     end = clock();
     timeCost = (end - start) / CLOCKS_PER_SEC;
-    // 6.0 s on my fx8300 3.3GHz
+    // 11.000000  on release mode
     for (addr = 0; addr < 16; addr++)
         printf("%x ", ppbuf[0][addr]); // p should be  1 | 2 | 4
     printf("\n use avx2: %lf \n", timeCost);
 
     putchar('\n');
 
-    // not use avx2
+    // lookup table
+    Lut = create_lut();
+    start = clock();
+    for (cycle_i = 0; cycle_i < nCycle; cycle_i++) {
+        lookup_p(ppbuf, nDisk, bufLen, Lut);
+    }
+    end = clock();
+    timeCost = (end - start) / CLOCKS_PER_SEC;
+    // 104.000000  on release mode
+    for (addr = 0; addr < 16; addr++)
+        printf("%x ", ppbuf[0][addr]); // p should be  1 | 2 | 4
+    printf("\n lookup table: %lf \n", timeCost);
+    destroy_lut(Lut);
+
+    putchar('\n');
+
+    // simply xor with nothing
     start = clock();
     for (cycle_i = 0; cycle_i < nCycle; cycle_i++) {
         cal_p(ppbuf, nDisk, bufLen);
     }
     end = clock();
     timeCost = (end - start) / CLOCKS_PER_SEC;
-    // 49.0 s on my fx8300 3.3GHz
+    // 63.000000  on release mode
     for (addr = 0; addr < 16; addr++)
         printf("%x ", ppbuf[0][addr]);
-    printf("\n not use avx2: %lf \n", timeCost);
+    printf("\n simply xor with nothing: %lf \n", timeCost);
 
     // release mem
     for (disk_i = 0; disk_i < nDisk; disk_i++) {

@@ -5,66 +5,36 @@
 
 #include <cal_p.h>
 
-void allign_cost(size_t cycleTimes);
-void direct_test();
-void xor_avx2(void *dst, void *op1, void *op2);
+//void allign_cost(size_t cycleTimes);
+//void direct_test();
+//void xor_avx2(void *dst, void *op1, void *op2);
 
-inline void cal_p(unsigned char **ppbuf, size_t nDisk, size_t diskLen);
-inline void avx2_cal_p(unsigned char **ppbuf, size_t nDisk, size_t bufLen);
+//unsigned char** create_lut(void);
+//void destroy_lut(unsigned char **Lut);
 
-
-
-
-inline void cal_p(unsigned char **ppbuf,
-           size_t nDisk, size_t diskLen)
+unsigned char** create_lut(void)
 {
-    unsigned char cdst;
-    size_t disk_i;
-    size_t addr = 0; // offset in a disk
+    unsigned char **Lut;
+    unsigned short i, j;
 
-    for (addr = 0 ; addr < diskLen; addr++) {
-        cdst = ppbuf[1][addr];
-        for (disk_i = 2; disk_i < nDisk; disk_i++) {
-            cdst = cdst ^ ppbuf[disk_i][addr];
-        }
-        ppbuf[0][addr] = cdst;
+    Lut = malloc(256 * sizeof(*Lut));
+    for (i = 0; i < 256; i++) {
+        Lut[i] = malloc(256);
+        for (j = 0; j < 256; j++)
+            Lut[i][j] = i ^ j;
     }
+    return Lut;
 }
 
-inline void avx2_cal_p(unsigned char **ppbuf,
-                       size_t nDisk, size_t bufLen)
+void destroy_lut(unsigned char **Lut)
 {
-    __m256d vdst;
-//    __m256d vop;
-    unsigned char cdst;
-
-    size_t disk_i;
-    size_t addr = 0; // offset in a disk buffer
-    size_t nBlk = bufLen/32; // hom many 32B in a col
-    size_t blk_i;
-
-    for (blk_i = 0; blk_i < nBlk; blk_i++) {
-        vdst = _mm256_loadu_pd((const double*)&ppbuf[1][addr]);
-        for (disk_i = 2; disk_i < nDisk; disk_i++) {
-//            vop = _mm256_loadu_pd((const double*)&ppbuf[disk_i][addr]);
-//            vdst = _mm256_xor_pd(vdst, vop);
-            vdst = _mm256_xor_pd(vdst,
-                                 _mm256_loadu_pd((const double*)&ppbuf[disk_i][addr]) );
-        }
-        _mm256_storeu_pd((double*)&ppbuf[0][addr], vdst);
-        addr += sizeof(__m256d); // next 32B
-    }
-
-    // remaining Bytes, less than 32B
-    for ( ; addr < bufLen; addr++) {
-        cdst = ppbuf[1][addr];
-        for (disk_i = 2; disk_i < nDisk; disk_i++) {
-            cdst = cdst ^ ppbuf[disk_i][addr];
-        }
-        ppbuf[0][addr] = cdst;
-    }
+    unsigned short i;
+    for (i = 0; i < 256; i++)
+        free(Lut[i]);
+    free(Lut);
 }
 
+/*
 void allign_cost(size_t cycleTimes)
 {
     void *dst;
@@ -194,3 +164,4 @@ inline void xor_avx2(void *dst, void *op1, void *op2)
 
     return ;
 }
+*/
