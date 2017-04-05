@@ -7,8 +7,9 @@
 unsigned char** create_lut(void);
 void destroy_lut(unsigned char **Lut);
 
-inline void lookup_p(unsigned char **ppbuf,
-           size_t nDisk, size_t diskLen, unsigned char **Lut) {
+static inline void lookup_p(unsigned char **ppbuf,
+           size_t nDisk, size_t diskLen, unsigned char **Lut)
+{
     unsigned char cdst;
     size_t disk_i;
     size_t addr = 0; // offset in a disk
@@ -24,7 +25,7 @@ inline void lookup_p(unsigned char **ppbuf,
 
 }
 
-inline void cal_p(unsigned char **ppbuf,
+static inline void cal_p(unsigned char **ppbuf,
            size_t nDisk, size_t diskLen)
 {
     unsigned char cdst;
@@ -40,7 +41,7 @@ inline void cal_p(unsigned char **ppbuf,
     }
 }
 
-inline void avx2_cal_p(unsigned char **ppbuf,
+static inline void avx2_cal_p(unsigned char **ppbuf,
                        size_t nDisk, size_t bufLen)
 {
     __m256d vdst;

@@ -54,7 +54,8 @@ void comp_avx2()
     }
     putchar('\n');
 
-    nCycle = 1024*512;
+//    nCycle = 1024*512;
+    nCycle = 1024*1024*2;
 
     // use avx2
     start = clock();
@@ -62,13 +63,14 @@ void comp_avx2()
         avx2_cal_p(ppbuf, nDisk, bufLen);
     }
     end = clock();
-    timeCost = (end - start) / CLOCKS_PER_SEC;
+    timeCost = (double)(end - start) / CLOCKS_PER_SEC;
     // 11.000000  on release mode
     for (addr = 0; addr < 16; addr++)
         printf("%x ", ppbuf[0][addr]); // p should be  1 | 2 | 4
     printf("\n use avx2: %lf \n", timeCost);
 
     putchar('\n');
+goto done;
 
     // lookup table
     Lut = create_lut();
@@ -77,7 +79,7 @@ void comp_avx2()
         lookup_p(ppbuf, nDisk, bufLen, Lut);
     }
     end = clock();
-    timeCost = (end - start) / CLOCKS_PER_SEC;
+    timeCost = (double)(end - start) / CLOCKS_PER_SEC;
     // 104.000000  on release mode
     for (addr = 0; addr < 16; addr++)
         printf("%x ", ppbuf[0][addr]); // p should be  1 | 2 | 4
@@ -92,15 +94,17 @@ void comp_avx2()
         cal_p(ppbuf, nDisk, bufLen);
     }
     end = clock();
-    timeCost = (end - start) / CLOCKS_PER_SEC;
+    timeCost = (double)(end - start) / CLOCKS_PER_SEC;
     // 63.000000  on release mode
     for (addr = 0; addr < 16; addr++)
         printf("%x ", ppbuf[0][addr]);
     printf("\n simply xor with nothing: %lf \n", timeCost);
 
+done:
     // release mem
     for (disk_i = 0; disk_i < nDisk; disk_i++) {
         free(ppbuf[disk_i]);
     }
     free(ppbuf);
+    getchar();
 }
