@@ -1,0 +1,46 @@
+#!/bin/sh
+#chkconfig: 2345 80 80
+#description: auto config router
+
+# above line2&3 are must for chkconfig --add
+
+#!/bin/sh = bash --posix
+
+# IFNAME=enp1s0
+
+# IF_LABEL-0=${IFNAME}-0
+# STATIC_IP="192.168."
+
+# IF_LABEL_1=${IFNAME}_1
+# LAN_GW="192.168.255.1"
+# MASK="24"
+
+# /etc/sysctl.conf
+# net.ipv4.ip_forward=1
+# sysctl -p
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+service iptables restart
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -F
+
+# service network restart
+# ip addr flush dev ${IFNAME}
+# ip link set ${IFNAME} down
+# ip link set ${IFNAME} up
+ifup #${IFNAME}:1
+
+# ip addr flush dev ${IFNAME}
+# ip addr add 192.168.255.250/16 dev ${IFNAME} label ${IFNAME}_a
+# ip addr add 192.168.167.110/16 dev ${IFNAME} label ${IFNAME}_b
+# ip addr add ${LAN_GW}/${MASK} dev ${IFNAME} label ${IFNAME}_1
+
+# iptables -A FORWARD -i $nic_lan_gw -o $nic_wan -j ACCEPT
+# route from wan to lan
+# iptables -A FORWARD -i $nic_wan -o $nic_lan_gw -j ACCEPT
+# iptables -A FORWARD -i $nic_wan -o $nic_lan_gw -m state --state ESTABLISHED,RELATED  -j ACCEPT
+iptables -t nat -A POSTROUTING -o ${IFNAME} -j MASQUERADE
+cd /home/rj
+nohup ./wuzong.sh &
