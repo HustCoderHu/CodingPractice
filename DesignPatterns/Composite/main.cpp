@@ -3,6 +3,8 @@
 
 using namespace std;
 
+
+
 /*
 Component抽象基类，为组合中的对象声明接口,声明了类共有接口的缺省行为(如这里的Add,Remove,GetChild函数),
 声明一个接口函数可以访问Component的子组件.
@@ -28,6 +30,7 @@ protected:
     Component() {}
 };
 
+// 安全组合模式
 //Leaf是叶子结点,也就是不含有子组件的结点类，所以不用实现Add、Remove、GetChild等方法
 class Leaf:public Component
 {
@@ -40,6 +43,8 @@ public:
         cout << "Leaf::Operation" << endl;
     }
 };
+// 透明组合模式 Leaf 与 Composite 所提供的接口一致，Client 可以相同地对待所有的对象。
+
 
 //Composite：含有子组件的类
 class Composite:public Component
