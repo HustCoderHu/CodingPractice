@@ -101,10 +101,76 @@ struct D3 : D2 {
 };
 
 // 虚函数默认实参 基类派生类的默认实参最好一致
-// 回避虚函数
+// 回避虚函数的机制
 void avoidVfunc(void)
 {
     // 强行调用基类中定义的函数版本 而不管baseP的动态类型
     // 编译时完成解析
 //    double undiscounted = baseP->Quote::netPrice(42);
+}
+
+class Disc_quote : public Quote {
+public:
+    Disc_quote() = default;
+    Disc_quote(const std::string& book, double price,
+               std::size_t qty, double disc):
+        Quote(book, price), quantity(qty), discount(disc) { }
+    double netPrice(std::size_t n) const = 0;
+    // 抽象基类不能实例化
+    // 纯虚函数可以提供定义，不过必须在类外部，定义的时候不能有 = 0
+private:
+    std::size_t quantity = 0;
+    double discount = 0.0;
+};
+
+// 当同一书籍的销售量超过某个值
+class Bulk_quote2 : public Disc_quote {
+public:
+    Bulk_quote2() = default;
+    Bulk_quote2(const std::string& book, double price,
+                std:: size_t qty, double disc):
+        Disc_quote(book, price, qty, disc) { }
+    double netPrice(std::size_t) const override;
+};
+
+// 派生类向基类转换的可访问性 Primer 5th 15.5 P544
+
+// 友元
+class Base {
+    friend class Pal;
+public:
+    std::size_t size() const { return n; }
+    int memfcn() { }
+protected:
+    int protMem;
+    std::size_t n;
+};
+class Sneaky : public Base {
+    friend void clobber(Sneaky&);   // 能访问Sneaky::protMem
+    friend void clobber(Base&);     // 不能访问Base::protMem
+    int j;  // 默认 private
+};
+// 友元关系不能继承
+class Pal {
+    int f(Base &b) { return b.protMem; }    // Pal 是 Base 的友元
+//    int f2(Sneaky &s) { return s.j; }       // Pal 不是 Sneaky 的友元
+    int f3(Sneaky &s) { return s.protMem; } // Pal 是 Base 的友元
+};
+// using 改变访问级别
+class Derived : private Base {
+public:
+    using Base::size;
+    int memfcn(int) { }         //  隐藏基类的 memfcn
+protected:
+    using Base::n;
+};
+
+// 类的作用域
+void testClassField(void)
+{
+    Derived d; Base b;
+    b.memfcn();
+    d.memfcn(10);
+//    d.memfcn();         // 无参数的memfcn被隐藏了
+    d.Base::memfcn();
 }
