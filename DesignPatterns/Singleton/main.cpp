@@ -3,7 +3,7 @@
 class Singleton {
 private:
     static Singleton *inst; // 1
-    Singleton() {} // 2
+    Singleton() = default; // 2
 
 public:
     static Singleton* getInst() { // 3
@@ -16,7 +16,8 @@ public:
     }
 
     ~Singleton() {
-        delete inst;
+        std::cout << "deconstruct" << std::endl;
+        inst = nullptr;
     }
 };
 
@@ -26,7 +27,8 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    Singleton* inst = Singleton::getInst();
+    Singleton *inst = Singleton::getInst();
     inst->show();
+    delete inst;
     return 0;
 }

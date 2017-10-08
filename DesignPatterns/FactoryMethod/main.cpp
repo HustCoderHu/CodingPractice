@@ -14,7 +14,7 @@ public:
         std::cout << "meow" << std::endl;
     }
 
-    ~Cat(){}
+    ~Cat() = default;
 };
 
 class Dog : public Pet {
@@ -23,7 +23,7 @@ public:
         std::cout << "bark" << std::endl;
     }
 
-    ~Dog(){}
+    ~Dog() = default;
 };
 
 class PetShop_base {
@@ -40,7 +40,7 @@ public:
         return new Cat();
     }
 
-    ~CatZone(){}
+    ~CatZone() = default;
 };
 
 class DogZone : public PetShop_base {
@@ -50,7 +50,7 @@ public:
         return new Dog();
     }
 
-    ~DogZone(){}
+    ~DogZone() = default;
 };
 
 using namespace std;

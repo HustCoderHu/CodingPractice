@@ -39,7 +39,7 @@ public:
     ~Invoker() = default;
 
     void calling(Command *cmd) {
-        cout << "Invoker call" << endl;
+        cout << "Invoker calling" << endl;
         if (nullptr != cmd)
             cmd->exec();
     }

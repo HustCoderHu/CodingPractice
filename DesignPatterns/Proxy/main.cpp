@@ -7,19 +7,17 @@ using namespace std;
 class Subject
 {
 public:
-    Subject() {}
-    virtual ~Subject() {}
-
+    virtual ~Subject() = default;
     virtual void Request() = 0;
 };
 
 class RealSubject : public Subject
 {
 public:
-    RealSubject() {}
-    ~RealSubject() {}
+    RealSubject() = default;
+    ~RealSubject() = default;
 
-    void Request() {
+    void Request() override {
         cout << "RealSubject Request" << endl;
     }
 };
@@ -27,12 +25,12 @@ public:
 class Proxy : public Subject
 {
 public:
-    Proxy() : m_pRealSubject(nullptr) {}
+    Proxy() : m_pRealSubject(nullptr) { }
     ~Proxy() {
         SAFE_DELETE(m_pRealSubject);
     }
 
-    void Request() {
+    void Request() override {
         if (nullptr == m_pRealSubject) {
             m_pRealSubject = new RealSubject();
         }

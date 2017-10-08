@@ -2,9 +2,6 @@
 #include <vector>
 
 using namespace std;
-
-
-
 /*
 Component抽象基类，为组合中的对象声明接口,声明了类共有接口的缺省行为(如这里的Add,Remove,GetChild函数),
 声明一个接口函数可以访问Component的子组件.
@@ -12,6 +9,7 @@ Component抽象基类，为组合中的对象声明接口,声明了类共有接�
 class Component
 {
 public:
+    virtual ~Component() = default;
     //纯虚函数，只提供接口，没有默认的实现
     virtual void Operation() = 0;
 
@@ -24,22 +22,20 @@ public:
     virtual Component* GetChild(int index) {
         return nullptr;
     }
-
-    virtual ~Component() {}
 protected:
-    Component() {}
+    Component() = default;
 };
 
 // 安全组合模式
 //Leaf是叶子结点,也就是不含有子组件的结点类，所以不用实现Add、Remove、GetChild等方法
-class Leaf:public Component
+class Leaf : public Component
 {
 public:
-    Leaf() {}
-    ~Leaf() {}
+    Leaf() = default;
+    ~Leaf() = default;
 
     //只实现Operation接口
-    virtual void Operation() {
+    void Operation() override {
         cout << "Leaf::Operation" << endl;
     }
 };
@@ -47,24 +43,25 @@ public:
 
 
 //Composite：含有子组件的类
-class Composite:public Component
+class Composite : public Component
 {
 public:
-    Composite() {}
-    ~Composite() {}
+    Composite() = default;
+    ~Composite() = default;
     //实现所有接口
-    void Operation() {
+    void Operation() override {
         cout << "Composite::Operation" << endl;
         for (auto &iter : m_ComVec)
             iter->Operation();
     }
 
-    void Add(Component *com) {
+    void Add(Component *com) override {
         m_ComVec.push_back(com);
     }
 
-    void Remove(Component*) {}
-    Component* GetChild(int index) {
+    void Remove(Component*) override { }
+
+    Component* GetChild(int index) override {
         if(index < 0 || index > m_ComVec.size())
             return nullptr;
         return m_ComVec[index];

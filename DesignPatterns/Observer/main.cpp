@@ -8,7 +8,7 @@ class Subject;
 class Observer {
 public:
 //    Observer() { }
-    virtual ~Observer() { }
+    virtual ~Observer() = default;
     virtual void update(int) = 0;
 
 };
@@ -16,7 +16,7 @@ public:
 class Subject {
 public:
 //    Subject() { }
-    virtual ~Subject() { }
+    virtual ~Subject() = default;
     virtual void attach(Observer *) = 0;
     virtual void detach(Observer *) = 0;
     virtual void notify() = 0;
