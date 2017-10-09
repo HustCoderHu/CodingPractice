@@ -1,22 +1,27 @@
-# linux ÈÏÖ¤´úÀí
-Ê¹ÓÃlinux iptablesµÄnat ¹¦ÄÜ£¬ÊµÏÖÒ»Ì¨Éè±¸ÈÏÖ¤£¬ÆäËûÉè±¸Â·ÓÉ·½Ê½½ÓÈëÍøÂç¡£
-ÒÔHUSTÐ£Ô°ÍøÎªÀý£¬ÔÚÒ»Ì¨linuxÏµÍ³ÀïÍ¨¹ýÈñ½Ý¿Í»§¶ËÈÏÖ¤Ö®ºó£¬ÆäËûÉè±¸ÉèÖÃ¾²Ì¬ip£¬²¢Íø¹ØÉèÖÃÎªlinuxÐéÄâ»úµÄip£¬¼´¿É½ÓÈë»¥ÁªÍø¡£ÀàËÆµÄ½â¾ö·½°¸ÓÐ£ºË¢ºÃÈñ½ÝµÄÂ·ÓÉÆ÷£¬ÌÔ±¦ÓÐÊÛ¡£
+# linux è®¤è¯ä»£ç†
+ä½¿ç”¨linux iptablesçš„nat åŠŸèƒ½ï¼Œå®žçŽ°ä¸€å°è®¾å¤‡è®¤è¯ï¼Œå…¶ä»–è®¾å¤‡è·¯ç”±æ–¹å¼æŽ¥å…¥ç½‘ç»œã€‚
+ä»¥HUSTæ ¡å›­ç½‘ä¸ºä¾‹ï¼Œåœ¨ä¸€å°linuxç³»ç»Ÿé‡Œé€šè¿‡é”æ·å®¢æˆ·ç«¯è®¤è¯ä¹‹åŽï¼Œå…¶ä»–è®¾å¤‡è®¾ç½®é™æ€ipï¼Œå¹¶ç½‘å…³è®¾ç½®ä¸ºlinuxè™šæ‹Ÿæœºçš„ipï¼Œå³å¯æŽ¥å…¥äº’è”ç½‘ã€‚ç±»ä¼¼çš„è§£å†³æ–¹æ¡ˆæœ‰ï¼šåˆ·å¥½é”æ·çš„è·¯ç”±å™¨ï¼Œæ·˜å®æœ‰å”®ã€‚
 
-±êÇ©£ºlinux iptables NAT Â·ÓÉ ×ÓÍø¿¨
-# keyword£ºlinux, iptables, NAT, Â·ÓÉ, ×ÓÍø¿¨
+æ ‡ç­¾ï¼šlinux iptables NAT è·¯ç”± å­ç½‘å¡
+# keywordï¼šlinux, iptables, NAT, è·¯ç”±, å­ç½‘å¡
 ---
 
-[TOC]
+[1 NAT](#nat)
+[1.1 linux NAT](#ipè½¬å‘)
+[1.2 æ¸…ç©ºiptablesè§„åˆ™](#æ¸…ç©ºiptablesè§„åˆ™)
+[1.3 è®¾ç½®NAT](#è®¾ç½®nat)
+[1.4 å•ç½‘å¡å®žçŽ°](#å•ç½‘å¡å®žçŽ°)
+[2 é…ç½®windows](#é…ç½®windows)
 
-# 1 linux NAT
-ÎÄ¼þ**408router-singleNIC**°üº¬ÁË½«linux±ä³ÉÂ·ÓÉÆ÷(IPv4)ÐèÒªµÄÃüÁî£¬
-ÎÄ¼þÍ·²¿ÓÐchkconfigÐèÒªµÄÇ°×º£¬ÔÚcentos7ÉÏ²âÊÔÍ¨¹ý£¬debianÏµ×¢Òâ¡£
-## .1 IP×ª·¢
+# NAT
+æ–‡ä»¶**408router-singleNIC**åŒ…å«äº†å°†linuxå˜æˆè·¯ç”±å™¨(IPv4)éœ€è¦çš„å‘½ä»¤ï¼Œ
+æ–‡ä»¶å¤´éƒ¨æœ‰chkconfigéœ€è¦çš„å‰ç¼€ï¼Œåœ¨centos7ä¸Šæµ‹è¯•é€šè¿‡ï¼Œdebianç³»æ³¨æ„ã€‚
+## IPè½¬å‘
 ```
 echo 1 > /proc/sys/net/ipv4/ip_forward
 ```
-## .2 Çå¿Õiptables¹æÔò
-Èç¹ûÓÐ×Ô¶¨Òå¹æÔò£¬Çë×¢Òâ±£Áô
+## æ¸…ç©ºiptablesè§„åˆ™
+å¦‚æžœæœ‰è‡ªå®šä¹‰è§„åˆ™ï¼Œè¯·æ³¨æ„ä¿ç•™
 ```
 service iptables restart
 iptables -P INPUT ACCEPT
@@ -24,20 +29,20 @@ iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 iptables -F
 ```
-## .3 ÉèÖÃNAT
-´ÓÆäËûÍø¿¨(³ýIFNAMEÖ®ÍâµÄ)£¬½øÈëÏµÍ³µÄpackage»á±»Ìæ»»Ô´µØÖ·ÎªIFNAMEµÄµØÖ·£¬È»ºó´ÓIFNAME×ª·¢³öÈ¥£¬ÏêÏ¸Ô­ÀíÇë×ÔÐÐ²éÔÄiptables natµÄ×ÊÁÏ
+## .3 è®¾ç½®NAT
+ä»Žå…¶ä»–ç½‘å¡(é™¤IFNAMEä¹‹å¤–çš„)ï¼Œè¿›å…¥ç³»ç»Ÿçš„packageä¼šè¢«æ›¿æ¢æºåœ°å€ä¸ºIFNAMEçš„åœ°å€ï¼Œç„¶åŽä»ŽIFNAMEè½¬å‘å‡ºåŽ»ï¼Œè¯¦ç»†åŽŸç†è¯·è‡ªè¡ŒæŸ¥é˜…iptables natçš„èµ„æ–™
 ```
 iptables -t nat -A POSTROUTING -o ${IFNAME} -j MASQUERADE
 ```
-## .4 µ¥Íø¿¨ÊµÏÖ
-ÐéÄâ»úÀï²âÊÔµÄÊ±ºò¿ÉÒÔÌí¼Ó¶îÍâµÄÍø¿¨£¬Ò»¸öÍø¿¨ÈÏÖ¤(WAN)£¬ÁíÒ»¸öÍø¿¨½ÓÊÕ¾ÖÓòÍøÊý¾Ý(LAN)£¬¾ÍÏñÂ·ÓÉÆ÷µÄWANºÍLANÒ»Ñù¡£
-±¾ÈËÓöµ½µÄÇé¿öÊÇ¿ÉÒÔÓÃ¶ÀÁ¢µÄÌ¨Ê½»ú´îÕâ¸örouter£¬µ«ÊÇÌ¨Ê½»úÖ»ÓÐÒ»¿éÍø¿¨¡£ÕÒµ½µÄ½â¾ö°ì·¨¾ÍÊÇ×ÓÍø¿¨¡£¿ÉÒÔÔÝÊ±Àí½âÎªÐéÄâ³öÀ´µÄÒ»¿éÍø¿¨£¬¾ßÌåÔ­ÀíÇë×ÔÐÐ²éÔÄ×ÊÁÏ¡£
+## .4 å•ç½‘å¡å®žçŽ°
+è™šæ‹Ÿæœºé‡Œæµ‹è¯•çš„æ—¶å€™å¯ä»¥æ·»åŠ é¢å¤–çš„ç½‘å¡ï¼Œä¸€ä¸ªç½‘å¡è®¤è¯(WAN)ï¼Œå¦ä¸€ä¸ªç½‘å¡æŽ¥æ”¶å±€åŸŸç½‘æ•°æ®(LAN)ï¼Œå°±åƒè·¯ç”±å™¨çš„WANå’ŒLANä¸€æ ·ã€‚
+æœ¬äººé‡åˆ°çš„æƒ…å†µæ˜¯å¯ä»¥ç”¨ç‹¬ç«‹çš„å°å¼æœºæ­è¿™ä¸ªrouterï¼Œä½†æ˜¯å°å¼æœºåªæœ‰ä¸€å—ç½‘å¡ã€‚æ‰¾åˆ°çš„è§£å†³åŠžæ³•å°±æ˜¯å­ç½‘å¡ã€‚å¯ä»¥æš‚æ—¶ç†è§£ä¸ºè™šæ‹Ÿå‡ºæ¥çš„ä¸€å—ç½‘å¡ï¼Œå…·ä½“åŽŸç†è¯·è‡ªè¡ŒæŸ¥é˜…èµ„æ–™ã€‚
 =-=-=-=-=-=-=-=-=-=-=-=-
-ifconfig¿É¿´µ½ÐÎÈç IFNAME:1 µÄÉè±¸£¬¿ÉÒÔÀàËÆÍ¨¹ýÎÄ¼þÅäÖÃÍø¿¨¾²Ì¬IPµÄ·½Ê½(ifcfg-enp1s0_1)£¬ÔÚ /etc/sysconfig/network-scriptsÄ¿Â¼ÏÂÌí¼ÓipÅäÖÃ
-×¢ÒâÎÄ¼þÃûÉè±¸Ãû¶¼ÊÇ´øÓÐ·ÖºÅµÄ£¬Õâ¸ö×ÓÍø¿¨×÷ÎªLAN¶Ë£¬ÆäËûÉè±¸½ÓÈëÊ±ÊÖ¶¯·ÖÅäip£¬²¢ÖÆ¶¨WAN¿¨IPÎªÍø¹Ø¡£
-Âß¼­ÉÏÊý¾Ý°ü´Ó IFNAME:1 ½øÈëlinux£¬±»NATºó´ÓIFNAME:1Á÷³ölinux£¬ÎïÀíÉÏ¾ÍÊÇ´ÓÍø¿¨½øÔÙ³öÀ´½øÈëInternet
+ifconfigå¯çœ‹åˆ°å½¢å¦‚ IFNAME:1 çš„è®¾å¤‡ï¼Œå¯ä»¥ç±»ä¼¼é€šè¿‡æ–‡ä»¶é…ç½®ç½‘å¡é™æ€IPçš„æ–¹å¼(ifcfg-enp1s0_1)ï¼Œåœ¨ /etc/sysconfig/network-scriptsç›®å½•ä¸‹æ·»åŠ ipé…ç½®
+æ³¨æ„æ–‡ä»¶åè®¾å¤‡åéƒ½æ˜¯å¸¦æœ‰åˆ†å·çš„ï¼Œè¿™ä¸ªå­ç½‘å¡ä½œä¸ºLANç«¯ï¼Œå…¶ä»–è®¾å¤‡æŽ¥å…¥æ—¶æ‰‹åŠ¨åˆ†é…ipï¼Œå¹¶åˆ¶å®šWANå¡IPä¸ºç½‘å…³ã€‚
+é€»è¾‘ä¸Šæ•°æ®åŒ…ä»Ž IFNAME:1 è¿›å…¥linuxï¼Œè¢«NATåŽä»ŽIFNAME:1æµå‡ºlinuxï¼Œç‰©ç†ä¸Šå°±æ˜¯ä»Žç½‘å¡è¿›å†å‡ºæ¥è¿›å…¥Internet
 
-**µ¥Íø¿¨²»ÄÜÆô¶¯DHCPserverµÄÔ­Òò** : ¶øÇÒÂ·ÓÉÆ÷µÄWANºÍLANÁ¬½ÓµÄÉè±¸ÊÇ·Ö´¦²»Í¬µÄÍøÂ·£¬ËùÒÔLANÉÏ¿ÉÒÔÆô¶¯DHCPserver¡£ÉÏÊöÇé¿öÒòÎªÖ»ÓÐÒ»¸öÎïÀíÍø¿¨£¬ÔÚÕâ¸ö×ÓÍø¿¨ÉÏÆô¶¯DHCPserver£¬DHCPserverÖ±½Ó³öÏÖÔÚWANÍøÂçÀï£¬¸ÉÈÅÆäËûÈË½ÓÈëÍøÂç£¬±íÏÖÎª¶ÏÍø¡£
+**å•ç½‘å¡ä¸èƒ½å¯åŠ¨DHCPserverçš„åŽŸå› ** : è€Œä¸”è·¯ç”±å™¨çš„WANå’ŒLANè¿žæŽ¥çš„è®¾å¤‡æ˜¯åˆ†å¤„ä¸åŒçš„ç½‘è·¯ï¼Œæ‰€ä»¥LANä¸Šå¯ä»¥å¯åŠ¨DHCPserverã€‚ä¸Šè¿°æƒ…å†µå› ä¸ºåªæœ‰ä¸€ä¸ªç‰©ç†ç½‘å¡ï¼Œåœ¨è¿™ä¸ªå­ç½‘å¡ä¸Šå¯åŠ¨DHCPserverï¼ŒDHCPserverç›´æŽ¥å‡ºçŽ°åœ¨WANç½‘ç»œé‡Œï¼Œå¹²æ‰°å…¶ä»–äººæŽ¥å…¥ç½‘ç»œï¼Œè¡¨çŽ°ä¸ºæ–­ç½‘ã€‚
 
-# 2 ÅäÖÃwindows
-Ê¹ÓÃÎÄ¼þdhcp_staticIP.bat
+# 2 é…ç½®windows
+ä½¿ç”¨æ–‡ä»¶dhcp_staticIP.bat
