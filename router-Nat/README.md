@@ -6,12 +6,12 @@
 # keyword：linux, iptables, NAT, 路由, 子网卡
 ---
 
-[1 NAT](#nat)
-[1.1 linux NAT](#ip转发)
-[1.2 清空iptables规则](#清空iptables规则)
-[1.3 设置NAT](#设置nat)
-[1.4 单网卡实现](#单网卡实现)
-[2 配置windows](#配置windows)
+- [1 NAT](#nat)
+- [1.1 linux NAT](#ip转发)
+- [1.2 清空iptables规则](#清空iptables规则)
+- [1.3 设置NAT](#设置nat)
+- [1.4 单网卡实现](#单网卡实现)
+- [2 配置windows](#配置windows)
 
 # NAT
 文件**408router-singleNIC**包含了将linux变成路由器(IPv4)需要的命令，
