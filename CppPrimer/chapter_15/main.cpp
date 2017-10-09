@@ -2,9 +2,11 @@
 
 using namespace std;
 
+void testVfunc(void);
+
 int main(int argc, char *argv[])
 {
-    cout << "Hello World!" << endl;
+    testVfunc();
     return 0;
 }
 
@@ -157,7 +159,7 @@ class Pal {
     int f3(Sneaky &s) { return s.protMem; } // Pal 是 Base 的友元
 };
 // using 改变访问级别
-class Derived : private Base {
+class Derived : public Base {
 public:
     using Base::size;
     int memfcn(int) { }         //  隐藏基类的 memfcn
@@ -173,4 +175,52 @@ void testClassField(void)
     d.memfcn(10);
 //    d.memfcn();         // 无参数的memfcn被隐藏了
     d.Base::memfcn();
+}
+
+// 虚函数与作用域
+class Base2 {
+public:
+    Base2() = default;
+    virtual ~Base2() = default;
+    virtual int fcn() { cout << "Base2 " << __FUNCTION__ << endl; }
+};
+class D_1 : public Base2 {
+public:
+    D_1() = default;
+    virtual ~D_1() = default;
+    // 隐藏基类的fcn，这个fcn不是虚函数
+    // D_1 继承了Base2::fcn() 的定义
+    int fcn(int)  { cout << "D_1 " << __FUNCTION__ << endl; }
+    virtual void f2() { cout << "D_1 " << __FUNCTION__ << endl; }
+};
+class D_2 : public D_1 {
+public:
+    D_2() = default;
+    ~D_2() = default;
+
+    // 非虚函数，隐藏了D_1::fcn(int)
+    int fcn(int) { cout << "D_2 " << __FUNCTION__ << endl; }
+    // 覆盖了Base 的虚函数fcn
+    int fcn() { cout << "D_2 " << __FUNCTION__ << endl; }
+    // 覆盖 f2
+    void f2() { cout << "D_2 " << __FUNCTION__ << endl; }
+};
+// 通过基类调用隐藏的虚函数
+void testVfunc(void)
+{
+//    return ;
+    Base2 bobj;
+    D_1 d1obj;
+    D_2 d2obj;
+
+    Base2 *bp1 = &bobj, *bp2 = &d1obj, *bp3 = &d2obj;
+    bp1->fcn(); // base2
+    bp2->fcn(); // base2
+    bp3->fcn(); // D_2
+
+    D_1 *d1p = &d1obj;
+    D_2 *d2p = &d2obj;
+//    bp2->f2();  // 错误 Base2 没有 f2
+    d1p->f2();
+    d2p->f2();
 }
