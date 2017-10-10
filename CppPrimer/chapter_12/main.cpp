@@ -87,3 +87,23 @@ shared_ptr<int> mixShared(void)
     return shared_ptr<int>(new int(1024));
 
 }
+
+// 不要使用 get 初始化另一个智能指针 or  给智能指针赋值
+void getFault(void)
+{
+    shared_ptr<int> p(new int(42));
+    // 正确，但使用 q 时要注意，不要让他管理的指针被释放
+    int *q = p.get();
+    {
+        // 未定义：两个独立的 shared_ptr 指向相同的内存
+        shared_ptr<int>(q);
+    }   // 程序块结束，q 被销毁，它指向的内存被释放
+    int foo = *p;   // p 指向的内存已经被释放了
+}
+
+// 其他 shared_ptr 操作
+void otherSharedOp(void)
+{
+    shared_ptr<int> p;
+    p.reset(new int(1024));
+}
