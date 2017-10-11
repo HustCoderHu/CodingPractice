@@ -106,4 +106,86 @@ void otherSharedOp(void)
 {
     shared_ptr<int> p;
     p.reset(new int(1024));
+
+    shared_ptr<string> p2;
+    if(!p2.unique())
+        p2.reset(new string(*p2));  // 我们不是唯一
+    // 用户，分配新的拷贝
+//    *p2 += newVal;
+}
+
+// 智能指针和异常
+void f()
+{
+    shared_ptr<int> sp(new int(42));
+    // 这段代码抛出一个异常，且在f中未被catch
+}   // 函数结束时 shared_ptr 自动释放内存
+// 使用自定义释放操作
+
+#ifdef connection
+void endConnection(connection *p)
+{
+    disconnect(*p);
+}
+auto lambda = [](connection *p) { disconnect(*p); }
+void f2(destination &d)
+{
+    connection c = connect(&d);
+    shared_ptr<connection> p(&c, endConnection);
+    // 使用连接
+    // 当 f2 退出时 (即使是由于异常而退出)，connection
+    // 会被正确关闭
+}
+#endif
+
+// unique_ptr
+// 不支持普通的拷贝 or 赋值
+void uniqueOp()
+{
+//    unique_ptr<T, D> u(d);
+    // d 替代 delete，类型为 D
+//    u.release();  //  放弃控制权，返回指针
+    // 并置空 u。
+    // ！！！ 资源没有被 delete，需要用户 delete
+
+    // p1 转移给 p2, p1 置空
+    unique_ptr<string> p1(new string("abc"));
+    unique_ptr<string> p2(p1.release());
+//    auto p3(p2.release());
+    p1.reset(p2.release());
+}
+// 禁止拷贝的列外
+unique_ptr<int> clone(int p)
+{
+    // 拷贝 or 赋值一个将要被销毁的 unique_ptr
+    return unique_ptr<int>(new int(p));
+    // 局部对象类似
+    // 这是一种特殊的 "拷贝"
+}
+// 重写连接程序
+#ifdef connection
+void f3(destination &d)
+{
+    connection c = connect(&d);
+    unique_ptr<connection, decltype(endConnection)*>
+            p(&c, endConnection);
+    // 加 * 表示函数指针
+    shared_ptr<connection> p(&c, endConnection);
+    // 使用连接
+    // 当 f3 退出时 (即使是由于异常而退出)，connection
+    // 会被正确关闭
+}
+#endif
+
+// weak_ptr 弱共享
+// weak_ptr<T> w(sp)    sp 类型 shared_ptr
+// w = p    p 可以是shared_ptr or weak_ptr
+// w.expired()  return w.use_count() == 0
+// w.lock()
+void weakLock()
+{
+    weak_ptr<int> wp;
+    if (shared_ptr<int> np = wp.lock()) {
+        // 在 if 中，np 与 p 共享对象
+    }
 }
