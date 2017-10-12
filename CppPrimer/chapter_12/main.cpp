@@ -18,8 +18,10 @@ void testSharedPtr(void)
     auto p6 = make_shared<string>("999");
 }
 
+class StrBlobPtr;
 // 共享底层 vector
 class StrBlob {
+    friend class StrBlobPtr;
 public:
     using size_type = std::vector<std::string>::size_type;
 
@@ -35,6 +37,9 @@ public:
     // 元素访问
     std::string& front() const;
     std::string& back();
+
+    StrBlobPtr begin();
+    StrBlobPtr end();
 
 private:
     std::shared_ptr<std::vector<std::string>> data;
@@ -184,8 +189,72 @@ void f3(destination &d)
 // w.lock()
 void weakLock()
 {
-    weak_ptr<int> wp;
+    auto p = make_shared<int>(42);
+    weak_ptr<int> wp(p);
     if (shared_ptr<int> np = wp.lock()) {
         // 在 if 中，np 与 p 共享对象
     }
 }
+// 伴随指针类
+class StrBlobPtr {
+public:
+    StrBlobPtr() : curr(0) { }
+    StrBlobPtr(StrBlob &a, size_t sz = 0):
+        wptr(a.data), curr(sz) { }
+    std::string& deref() const {
+        auto p = check(curr, "dereference past end");
+        return (*p)[curr];  //  (*p)是对象所指向的vector
+    }
+    StrBlobPtr& incr() { // 前缀递增
+        check(curr, "increment pas end of StrBlobPtr");
+        ++curr; //  推进当前位置
+        return *this;
+    }
+
+private:
+    std::shared_ptr<std::vector<std::string>>
+        check(std::size_t i, const std::string &msg) const {
+        auto ret = wptr.lock(); //  vector 还还存在吗
+        if (!ret)
+            throw std::runtime_error("unboud StrBlobPtr");
+        if (i >= ret->size())
+            throw std::out_of_range(msg);
+        return ret; //  否则，返回指向vecotr的shared_ptr
+    }
+    std::weak_ptr<std::vector<std::string>> wptr;
+    std::size_t curr;
+};
+
+StrBlobPtr StrBlob::begin()
+{
+    return StrBlobPtr(*this);
+}
+StrBlobPtr StrBlob::end()
+{
+    return StrBlobPtr(*this, data->size());
+}
+
+// 12.2 动态数组 new
+// delete[] obj 按逆序销毁
+
+// 智能指针 和 动态数组
+void SmartPtrAndNew()
+{
+    unique_ptr<int[]> up(new int[10]);
+//    up.release();   //  自动用 delete[] 销毁其指针
+    // P425 错误 ? release 有销毁过程?
+    for (size_t i = 0; i < 10; ++i)
+        up[i] = i;  //  为每个元素赋予一个新值
+
+    // shared_ptr 不支持直接管理动态数组
+    // if want 必须提供自己定义的删除器
+    auto deleter = [](int *p) { delete[] p; };
+    shared_ptr<int> sp(new int[10], deleter);
+//    sp.reset();
+    // 默认 delete，而不是 delete[]
+
+    // shared_ptr 未定义下标运算符，并且不支持指针的算数运算
+    for (size_t i = 0; i < 10; ++i)
+        *(sp.get() + i) = i;
+}
+
