@@ -258,3 +258,33 @@ void SmartPtrAndNew()
         *(sp.get() + i) = i;
 }
 
+// allocator 类  定义在memory中
+//allocator<string> alloc;          //  可以分配 string 的 allocator 对象
+//auto const p = alloc.allocate(n); // 分配 n 个未初始化的 string，只分配了内存
+void startAllocator()
+{
+    allocator<string> a;
+    auto const p = a.allocate(4);
+    auto q = p;
+    // construct 构造对象
+    a.construct(q++);           //  *q 为空字符串
+    a.construct(q++, 10, 'c');
+    a.construct(q++, "hi");
+
+    // 用户对象后，用 destroy 析构对象
+    while (q != p)
+        a.destroy(--q);
+
+    // 释放内存
+    a.deallocate(p, 10);
+
+    // 伴随算法，可以在未初始化内存中创建对象
+    vector<int> vi{0, 1, 2, 3};
+    allocator<int> b;
+    auto p = b.allocate(vi.size() * 2);
+    // 拷贝 vi 中的元素构造前 vi.size() 个元素
+    auto q = uninitialized_copy(vi.begin(), vi.end(), p);
+//    uninitialized_copy_n(vi.begin(), vi.size(), p);
+    // 将剩余元素初始化为 42
+    uninitialized_fill_n(q, vi.size(), 42);
+}
