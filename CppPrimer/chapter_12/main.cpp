@@ -90,7 +90,6 @@ shared_ptr<int> mixShared(void)
 
 //    return new int(1024); // 错误，原因同 p1
     return shared_ptr<int>(new int(1024));
-
 }
 
 // 不要使用 get 初始化另一个智能指针 or  给智能指针赋值
