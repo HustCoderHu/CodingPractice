@@ -1,27 +1,33 @@
 @echo off
 :configure
+
+REM 是注释
+
 REM info about router and its lan
 REM gateway route into lan
 REM for example: ping 192.168.166.110 from 115.156.166.110
 set dest=192.168.0.0
-set routerWanIP=115.156.156.71
+set routerWanIP=115.156.156.128
+REM arp -a |findstr "14-da-e9-e2-71-cd"
 
 REM !!!!!!!!!!!!!! attention !!!!!!!!!!!!!!
-REM adapterName & myIP need modified according to your win
+REM adapterName & myIP need modified according to your windows
 REM set adapterName=Ethernet
 REM !!!!!!!!!!!!!! attention !!!!!!!!!!!!!!
 
 REM ---- 115 ip
 REM ----
 REM set myIP=115.156.16.
-REM set gateway=115.156.166.202
 REM set mask=255.255.254.0
+REM set gateway=115.156.166.202
+
 
 REM ---- 192 ip
 REM ----
-set myIP=192.168.110.110
-set gateway=192.168.0.1
+set myIP=192.168.x.x
 set mask=255.255.0.0
+set gateway=192.168.0.1
+
 
 REM ---- DNS config
 REM ----
