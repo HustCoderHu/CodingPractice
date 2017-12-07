@@ -10,3 +10,8 @@ HEADERS += \
     cal_p.h
 
 QMAKE_CFLAGS += -mavx2
+QMAKE_CFLAGS += -fopenmp
+#QMAKE_CXXFLAGS += -fopenmp
+QMAKE_LFLAGS += -fopenmp
+
+LIBS += -lgomp -lpthread

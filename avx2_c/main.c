@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <omp.h>
 //#include <limits.h>
 #include <cal_p.h>
 
@@ -59,6 +60,8 @@ void comp_avx2()
 
     // use avx2
     start = clock();
+//    #pragma omp parallel for num_threads(4)
+    #pragma omp parallel for
     for (cycle_i = 0; cycle_i < nCycle; cycle_i++) {
         avx2_cal_p(ppbuf, nDisk, bufLen);
     }
