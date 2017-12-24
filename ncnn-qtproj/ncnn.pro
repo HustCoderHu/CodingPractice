@@ -108,7 +108,8 @@ HEADERS += \
     ../../ncnn/src/mat.h \
     ../../ncnn/src/net.h \
     ../../ncnn/src/opencv.h \
-    ../../ncnn/src/paramdict.h
+    ../../ncnn/src/paramdict.h \
+    ../../ncnn/src/layer/arm/shufflechannel_arm.h
 
 SOURCES += \
     ../../ncnn/autotest/autotest.cpp \
@@ -199,7 +200,8 @@ SOURCES += \
     ../../ncnn/tools/caffe/caffe2ncnn.cpp \
     ../../ncnn/tools/mxnet/mxnet2ncnn.cpp \
     ../../ncnn/tools/tensorflow/tensorflow2ncnn.cpp \
-    ../../ncnn/tools/ncnn2mem.cpp
+    ../../ncnn/tools/ncnn2mem.cpp \
+    ../../ncnn/src/layer/arm/shufflechannel_arm.cpp
 
 DISTFILES += \
     ../../ncnn/autotest/CMakeLists.txt \
