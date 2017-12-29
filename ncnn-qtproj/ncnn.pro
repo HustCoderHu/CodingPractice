@@ -109,7 +109,9 @@ HEADERS += \
     ../../ncnn/src/net.h \
     ../../ncnn/src/opencv.h \
     ../../ncnn/src/paramdict.h \
-    ../../ncnn/src/layer/arm/shufflechannel_arm.h
+    ../../ncnn/src/layer/arm/shufflechannel_arm.h \
+    ../../ncnn/src/layer/arm/convolutiondepthwise_3x3.h \
+    ../../ncnn/src/layer/arm/convolution_3x3-my.h
 
 SOURCES += \
     ../../ncnn/autotest/autotest.cpp \
