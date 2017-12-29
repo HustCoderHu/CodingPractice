@@ -157,7 +157,10 @@ def main(_):
   train_writer = tf.summary.FileWriter(graph_location)
   train_writer.add_graph(tf.get_default_graph())
 
-  with tf.Session() as sess:
+  config = tf.ConfigProto()
+  config.gpu_options.allow_growth = True
+  
+  with tf.Session(config = config) as sess:
     sess.run(tf.global_variables_initializer())
     for i in range(20000):
       batch = mnist.train.next_batch(50)
@@ -166,7 +169,9 @@ def main(_):
             x: batch[0], y_: batch[1], keep_prob: 1.0})
         print('step %d, training accuracy %g' % (i, train_accuracy))
       train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
-
+    # error on my 750ti
+    # Allocator (GPU_0_bfc) ran out of memory trying to allocate 957.03MiB
+    # Resource exhausted: OOM when allocating tensor with shape[10000,32,28,28]
     print('test accuracy %g' % accuracy.eval(feed_dict={
         x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
 
