@@ -1,11 +1,18 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <map>
 
 using namespace std;
 
+void testSp(map<int, shared_ptr<string> >& mm);
+void testSp2(map<int, shared_ptr<string> > &mm);
+
 int main(int argc, char *argv[])
 {
+    map<int, shared_ptr<string> > mm;
+    testSp(mm);
+    testSp2(mm);
     return 0;
 }
 
@@ -280,10 +287,45 @@ void startAllocator()
     // 伴随算法，可以在未初始化内存中创建对象
     vector<int> vi{0, 1, 2, 3};
     allocator<int> b;
-    auto p = b.allocate(vi.size() * 2);
+    auto p2 = b.allocate(vi.size() * 2);
     // 拷贝 vi 中的元素构造前 vi.size() 个元素
-    auto q = uninitialized_copy(vi.begin(), vi.end(), p);
+    auto q2 = uninitialized_copy(vi.begin(), vi.end(), p2);
 //    uninitialized_copy_n(vi.begin(), vi.size(), p);
     // 将剩余元素初始化为 42
-    uninitialized_fill_n(q, vi.size(), 42);
+    uninitialized_fill_n(q2, vi.size(), 42);
+}
+
+void testSp(map<int, shared_ptr<string> > &mm)
+{
+    shared_ptr<string> a(new string("2018"));
+//    mm.insert(pair<int, shared_ptr<string>>(1, a));
+    mm[1] = a;
+}
+
+void testSp2(map<int, shared_ptr<string> >& mm)
+{
+    auto iter = mm.find(1);
+    if (iter == mm.end()) {
+        cout << "not found" << endl;
+        return ;
+    }
+    cout << "found" << endl;
+
+    auto iter2 = mm.find(1);
+    auto iter3 = mm.find(1);
+
+//    shared_ptr<string> a = iter->second;
+//    cout << a.use_count() << endl;
+//    a = nullptr;
+//    cout << a.use_count() << endl;
+
+//    printf("%p\n", static_cast<void*>(iter->second.get()));
+//    cout << iter->second << endl;
+//    mm.erase(iter);
+//    cout << a.use_count() << endl;
+//    printf("%p\n", static_cast<void*>(iter->second.get()));
+//    iter->second = nullptr;
+//    return ;
+    cout << iter->second.use_count() << endl;
+//    cout << iter->second.get()
 }
