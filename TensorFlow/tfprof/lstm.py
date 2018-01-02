@@ -5,11 +5,12 @@ from __future__ import print_function
 
 import argparse
 import sys
-
-from tensorflow.examples.tutorials.mnist import input_data
+import time
+import numpy as np
 
 import tensorflow as tf
 from tensorflow.contrib import rnn
+from tensorflow.python.client import timeline
 
 FLAGS = None
 n_input = 28 # MNIST data input (img shape: 28*28)
@@ -35,22 +36,45 @@ def main(_):
 
     # cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
     # cell = rnn.BasicLSTMCell(n_hidden)
-    # cell = rnn.LSTMCell(n_hidden)
-    cell = rnn.GRUCell(n_hidden)
+    cell = rnn.LSTMCell(n_hidden)
+    # cell = rnn.GRUCell(n_hidden)
     # print(cell.state_size)
     
-    n_input = 100
+    n_input = 10000
     n_steps = 1
     # print(n_steps * n_input)
     inputs = tf.placeholder(tf.float32, [batch_size, n_steps * n_input])
     print(inputs)
-    return 
     h0 = cell.zero_state(batch_size, tf.float32)
     output, h1 = cell.call(inputs, h0)
 
-    tf.profiler.profile(
-        tf.get_default_graph(), options=tf.profiler.ProfileOptionBuilder.float_operation())
+    # tf.profiler.profile(
+        # tf.get_default_graph(), options=tf.profiler.ProfileOptionBuilder.float_operation())
+    # return 
+    # np.zero, np.one
+    feed2input = np.full((batch_size, n_steps * n_input), 0.)
 
+    
+    # with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess :
+    with tf.Session() as sess :
+        sess.run(tf.global_variables_initializer())
+        
+        # add additional options to trace the session execution
+        options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+        run_metadata = tf.RunMetadata()
+        
+        # start = time.perf_counter()
+        sess.run([output, h1], feed_dict={inputs: feed2input}, 
+                        options=options, run_metadata=run_metadata)
+        # Create the Timeline object, and write it to a json file
+        fetched_timeline = timeline.Timeline(run_metadata.step_stats)
+        chrome_trace = fetched_timeline.generate_chrome_trace_format()
+        with open('timeline_01.json', 'w') as f:
+            f.write(chrome_trace)
+        # elapsed = time.perf_counter() - start
+    # print(result)
+    print('\n')
+    # print('Elapsed %.6f seconds.' % elapsed)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

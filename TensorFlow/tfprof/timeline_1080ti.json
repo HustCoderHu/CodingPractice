@@ -1,0 +1,1012 @@
+{
+    "traceEvents": [
+        {
+            "pid": 0,
+            "ph": "M",
+            "args": {
+                "name": "Allocators"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 1,
+            "ph": "M",
+            "args": {
+                "name": "/job:localhost/replica:0/task:0/device:CPU:0 Compute"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 2,
+            "ph": "M",
+            "args": {
+                "name": "/job:localhost/replica:0/task:0/device:CPU:0 Tensors"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 3,
+            "ph": "M",
+            "args": {
+                "name": "/job:localhost/replica:0/task:0/device:GPU:0 Compute"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 4,
+            "ph": "M",
+            "args": {
+                "name": "/job:localhost/replica:0/task:0/device:GPU:0 Tensors"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 5,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:all Compute"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 6,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:all Tensors"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 7,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:13 Compute"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 8,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:13 Tensors"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 9,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/memcpy Compute"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 10,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/memcpy Tensors"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 11,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:14 Compute"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 12,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:14 Tensors"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 13,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:15 Compute"
+            },
+            "name": "process_name"
+        },
+        {
+            "pid": 14,
+            "ph": "M",
+            "args": {
+                "name": "/device:GPU:0/stream:15 Tensors"
+            },
+            "name": "process_name"
+        },
+        {
+            "dur": 33,
+            "args": {
+                "op": "NoOp",
+                "name": "_SOURCE"
+            },
+            "pid": 1,
+            "ts": 1514883391535609,
+            "ph": "X",
+            "tid": 0,
+            "name": "NoOp",
+            "cat": "Op"
+        },
+        {
+            "dur": 16,
+            "args": {
+                "op": "_Arg",
+                "name": "_arg_Placeholder_0_0"
+            },
+            "pid": 1,
+            "ts": 1514883391535855,
+            "ph": "X",
+            "tid": 0,
+            "name": "_Arg",
+            "cat": "Op"
+        },
+        {
+            "dur": 16,
+            "args": {
+                "op": "_Retval",
+                "input0": "add_1/_3",
+                "name": "_retval_add_1_0_0"
+            },
+            "pid": 1,
+            "ts": 1514883391537480,
+            "ph": "X",
+            "tid": 0,
+            "name": "_Retval",
+            "cat": "Op"
+        },
+        {
+            "id": 0,
+            "pid": 3,
+            "ts": 1514883391537191,
+            "ph": "s",
+            "tid": 0,
+            "name": "add_1",
+            "cat": "DataFlow"
+        },
+        {
+            "id": 0,
+            "pid": 1,
+            "ts": 1514883391537480,
+            "ph": "t",
+            "tid": 0,
+            "name": "add_1",
+            "cat": "DataFlow"
+        },
+        {
+            "dur": 8,
+            "args": {
+                "op": "_Retval",
+                "input0": "mul_2/_5",
+                "name": "_retval_mul_2_0_1"
+            },
+            "pid": 1,
+            "ts": 1514883391537536,
+            "ph": "X",
+            "tid": 0,
+            "name": "_Retval",
+            "cat": "Op"
+        },
+        {
+            "id": 1,
+            "pid": 3,
+            "ts": 1514883391537427,
+            "ph": "s",
+            "tid": 0,
+            "name": "mul_2",
+            "cat": "DataFlow"
+        },
+        {
+            "id": 1,
+            "pid": 1,
+            "ts": 1514883391537536,
+            "ph": "t",
+            "tid": 0,
+            "name": "mul_2",
+            "cat": "DataFlow"
+        },
+        {
+            "dur": 55,
+            "args": {
+                "op": "NoOp",
+                "name": "_SOURCE"
+            },
+            "pid": 3,
+            "ts": 1514883391535609,
+            "ph": "X",
+            "tid": 0,
+            "name": "NoOp",
+            "cat": "Op"
+        },
+        {
+            "dur": 20,
+            "args": {
+                "op": "Const",
+                "name": "add/y"
+            },
+            "pid": 3,
+            "ts": 1514883391535674,
+            "ph": "X",
+            "tid": 0,
+            "name": "Const",
+            "cat": "Op"
+        },
+        {
+            "dur": 9,
+            "args": {
+                "op": "Const",
+                "name": "LSTMCellZeroState/zeros"
+            },
+            "pid": 3,
+            "ts": 1514883391535697,
+            "ph": "X",
+            "tid": 0,
+            "name": "Const",
+            "cat": "Op"
+        },
+        {
+            "dur": 8,
+            "args": {
+                "op": "Const",
+                "name": "split/split_dim"
+            },
+            "pid": 3,
+            "ts": 1514883391535708,
+            "ph": "X",
+            "tid": 0,
+            "name": "Const",
+            "cat": "Op"
+        },
+        {
+            "dur": 29,
+            "args": {
+                "op": "VariableV2",
+                "name": "kernel"
+            },
+            "pid": 3,
+            "ts": 1514883391535718,
+            "ph": "X",
+            "tid": 0,
+            "name": "VariableV2",
+            "cat": "Op"
+        },
+        {
+            "dur": 11,
+            "args": {
+                "op": "VariableV2",
+                "name": "bias"
+            },
+            "pid": 3,
+            "ts": 1514883391535750,
+            "ph": "X",
+            "tid": 0,
+            "name": "VariableV2",
+            "cat": "Op"
+        },
+        {
+            "dur": 9,
+            "args": {
+                "op": "Identity",
+                "input0": "kernel",
+                "name": "kernel/read"
+            },
+            "pid": 3,
+            "ts": 1514883391535763,
+            "ph": "X",
+            "tid": 0,
+            "name": "Identity",
+            "cat": "Op"
+        },
+        {
+            "dur": 6,
+            "args": {
+                "op": "Identity",
+                "input0": "bias",
+                "name": "bias/read"
+            },
+            "pid": 3,
+            "ts": 1514883391535776,
+            "ph": "X",
+            "tid": 0,
+            "name": "Identity",
+            "cat": "Op"
+        },
+        {
+            "dur": 146,
+            "args": {
+                "input1": "LSTMCellZeroState/zeros",
+                "op": "ConcatV2",
+                "input2": "split/split_dim",
+                "input0": "_arg_Placeholder_0_0/_1",
+                "name": "concat"
+            },
+            "pid": 3,
+            "ts": 1514883391536213,
+            "ph": "X",
+            "tid": 0,
+            "name": "ConcatV2",
+            "cat": "Op"
+        },
+        {
+            "id": 2,
+            "pid": 1,
+            "ts": 1514883391535871,
+            "ph": "s",
+            "tid": 0,
+            "name": "_arg_Placeholder_0_0",
+            "cat": "DataFlow"
+        },
+        {
+            "id": 2,
+            "pid": 3,
+            "ts": 1514883391536213,
+            "ph": "t",
+            "tid": 0,
+            "name": "_arg_Placeholder_0_0",
+            "cat": "DataFlow"
+        },
+        {
+            "dur": 151,
+            "args": {
+                "input1": "kernel/read",
+                "op": "MatMul",
+                "input0": "concat",
+                "name": "MatMul"
+            },
+            "pid": 3,
+            "ts": 1514883391536366,
+            "ph": "X",
+            "tid": 0,
+            "name": "MatMul",
+            "cat": "Op"
+        },
+        {
+            "dur": 91,
+            "args": {
+                "input1": "bias/read",
+                "op": "BiasAdd",
+                "input0": "MatMul",
+                "name": "BiasAdd"
+            },
+            "pid": 3,
+            "ts": 1514883391536526,
+            "ph": "X",
+            "tid": 0,
+            "name": "BiasAdd",
+            "cat": "Op"
+        },
+        {
+            "dur": 85,
+            "args": {
+                "input1": "BiasAdd",
+                "op": "Split",
+                "input0": "split/split_dim",
+                "name": "split"
+            },
+            "pid": 3,
+            "ts": 1514883391536624,
+            "ph": "X",
+            "tid": 0,
+            "name": "Split",
+            "cat": "Op"
+        },
+        {
+            "dur": 61,
+            "args": {
+                "input1": "add/y",
+                "op": "Add",
+                "input0": "split:2",
+                "name": "add"
+            },
+            "pid": 3,
+            "ts": 1514883391536717,
+            "ph": "X",
+            "tid": 0,
+            "name": "Add",
+            "cat": "Op"
+        },
+        {
+            "dur": 62,
+            "args": {
+                "op": "Tanh",
+                "input0": "split:1",
+                "name": "Tanh"
+            },
+            "pid": 3,
+            "ts": 1514883391536785,
+            "ph": "X",
+            "tid": 0,
+            "name": "Tanh",
+            "cat": "Op"
+        },
+        {
+            "dur": 57,
+            "args": {
+                "op": "Sigmoid",
+                "input0": "split",
+                "name": "Sigmoid_1"
+            },
+            "pid": 3,
+            "ts": 1514883391536853,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 44,
+            "args": {
+                "op": "Sigmoid",
+                "input0": "split:3",
+                "name": "Sigmoid_2"
+            },
+            "pid": 3,
+            "ts": 1514883391536916,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 44,
+            "args": {
+                "op": "Sigmoid",
+                "input0": "add",
+                "name": "Sigmoid"
+            },
+            "pid": 3,
+            "ts": 1514883391536965,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 55,
+            "args": {
+                "input1": "Tanh",
+                "op": "Mul",
+                "input0": "Sigmoid_1",
+                "name": "mul_1"
+            },
+            "pid": 3,
+            "ts": 1514883391537015,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 48,
+            "args": {
+                "input1": "LSTMCellZeroState/zeros",
+                "op": "Mul",
+                "input0": "Sigmoid",
+                "name": "mul"
+            },
+            "pid": 3,
+            "ts": 1514883391537076,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 61,
+            "args": {
+                "input1": "mul_1",
+                "op": "Add",
+                "input0": "mul",
+                "name": "add_1"
+            },
+            "pid": 3,
+            "ts": 1514883391537130,
+            "ph": "X",
+            "tid": 0,
+            "name": "Add",
+            "cat": "Op"
+        },
+        {
+            "dur": 59,
+            "args": {
+                "op": "Tanh",
+                "input0": "add_1",
+                "name": "Tanh_1"
+            },
+            "pid": 3,
+            "ts": 1514883391537308,
+            "ph": "X",
+            "tid": 0,
+            "name": "Tanh",
+            "cat": "Op"
+        },
+        {
+            "dur": 54,
+            "args": {
+                "input1": "Tanh_1",
+                "op": "Mul",
+                "input0": "Sigmoid_2",
+                "name": "mul_2"
+            },
+            "pid": 3,
+            "ts": 1514883391537373,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 59,
+            "args": {
+                "op": "MatMul",
+                "name": "MatMul"
+            },
+            "pid": 5,
+            "ts": 1514883391536493,
+            "ph": "X",
+            "tid": 0,
+            "name": "MatMul",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "BiasAdd",
+                "name": "BiasAdd"
+            },
+            "pid": 5,
+            "ts": 1514883391536605,
+            "ph": "X",
+            "tid": 0,
+            "name": "BiasAdd",
+            "cat": "Op"
+        },
+        {
+            "dur": 7,
+            "args": {
+                "op": "Split",
+                "name": "split"
+            },
+            "pid": 5,
+            "ts": 1514883391536690,
+            "ph": "X",
+            "tid": 0,
+            "name": "Split",
+            "cat": "Op"
+        },
+        {
+            "dur": 2,
+            "args": {
+                "op": "Add",
+                "name": "add"
+            },
+            "pid": 5,
+            "ts": 1514883391536766,
+            "ph": "X",
+            "tid": 0,
+            "name": "Add",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Tanh",
+                "name": "Tanh"
+            },
+            "pid": 5,
+            "ts": 1514883391536835,
+            "ph": "X",
+            "tid": 0,
+            "name": "Tanh",
+            "cat": "Op"
+        },
+        {
+            "dur": 4,
+            "args": {
+                "op": "Sigmoid",
+                "name": "Sigmoid_1"
+            },
+            "pid": 5,
+            "ts": 1514883391536899,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Sigmoid",
+                "name": "Sigmoid_2"
+            },
+            "pid": 5,
+            "ts": 1514883391536951,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Sigmoid",
+                "name": "Sigmoid"
+            },
+            "pid": 5,
+            "ts": 1514883391537000,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Mul",
+                "name": "mul_1"
+            },
+            "pid": 5,
+            "ts": 1514883391537057,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 2,
+            "args": {
+                "op": "Mul",
+                "name": "mul"
+            },
+            "pid": 5,
+            "ts": 1514883391537115,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Add",
+                "name": "add_1"
+            },
+            "pid": 5,
+            "ts": 1514883391537170,
+            "ph": "X",
+            "tid": 0,
+            "name": "Add",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Tanh",
+                "name": "Tanh_1"
+            },
+            "pid": 5,
+            "ts": 1514883391537356,
+            "ph": "X",
+            "tid": 0,
+            "name": "Tanh",
+            "cat": "Op"
+        },
+        {
+            "dur": 2,
+            "args": {
+                "op": "Mul",
+                "name": "mul_2"
+            },
+            "pid": 5,
+            "ts": 1514883391537415,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 59,
+            "args": {
+                "op": "MatMul",
+                "name": "MatMul"
+            },
+            "pid": 7,
+            "ts": 1514883391536493,
+            "ph": "X",
+            "tid": 0,
+            "name": "MatMul",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "BiasAdd",
+                "name": "BiasAdd"
+            },
+            "pid": 7,
+            "ts": 1514883391536605,
+            "ph": "X",
+            "tid": 0,
+            "name": "BiasAdd",
+            "cat": "Op"
+        },
+        {
+            "dur": 7,
+            "args": {
+                "op": "Split",
+                "name": "split"
+            },
+            "pid": 7,
+            "ts": 1514883391536690,
+            "ph": "X",
+            "tid": 0,
+            "name": "Split",
+            "cat": "Op"
+        },
+        {
+            "dur": 2,
+            "args": {
+                "op": "Add",
+                "name": "add"
+            },
+            "pid": 7,
+            "ts": 1514883391536766,
+            "ph": "X",
+            "tid": 0,
+            "name": "Add",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Tanh",
+                "name": "Tanh"
+            },
+            "pid": 7,
+            "ts": 1514883391536835,
+            "ph": "X",
+            "tid": 0,
+            "name": "Tanh",
+            "cat": "Op"
+        },
+        {
+            "dur": 4,
+            "args": {
+                "op": "Sigmoid",
+                "name": "Sigmoid_1"
+            },
+            "pid": 7,
+            "ts": 1514883391536899,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Sigmoid",
+                "name": "Sigmoid_2"
+            },
+            "pid": 7,
+            "ts": 1514883391536951,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Sigmoid",
+                "name": "Sigmoid"
+            },
+            "pid": 7,
+            "ts": 1514883391537000,
+            "ph": "X",
+            "tid": 0,
+            "name": "Sigmoid",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Mul",
+                "name": "mul_1"
+            },
+            "pid": 7,
+            "ts": 1514883391537057,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 2,
+            "args": {
+                "op": "Mul",
+                "name": "mul"
+            },
+            "pid": 7,
+            "ts": 1514883391537115,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Add",
+                "name": "add_1"
+            },
+            "pid": 7,
+            "ts": 1514883391537170,
+            "ph": "X",
+            "tid": 0,
+            "name": "Add",
+            "cat": "Op"
+        },
+        {
+            "dur": 3,
+            "args": {
+                "op": "Tanh",
+                "name": "Tanh_1"
+            },
+            "pid": 7,
+            "ts": 1514883391537356,
+            "ph": "X",
+            "tid": 0,
+            "name": "Tanh",
+            "cat": "Op"
+        },
+        {
+            "dur": 2,
+            "args": {
+                "op": "Mul",
+                "name": "mul_2"
+            },
+            "pid": 7,
+            "ts": 1514883391537415,
+            "ph": "X",
+            "tid": 0,
+            "name": "Mul",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "ConcatV2",
+                "name": "concat"
+            },
+            "pid": 7,
+            "ts": 1514883391536326,
+            "ph": "X",
+            "tid": 1,
+            "name": "ConcatV2",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "ConcatV2",
+                "name": "concat"
+            },
+            "pid": 7,
+            "ts": 1514883391536348,
+            "ph": "X",
+            "tid": 1,
+            "name": "ConcatV2",
+            "cat": "Op"
+        },
+        {
+            "dur": 5,
+            "args": {
+                "op": "MEMCPYHtoD",
+                "name": "edge_34__arg_Placeholder_0_0"
+            },
+            "pid": 9,
+            "ts": 1514883391536000,
+            "ph": "X",
+            "tid": 0,
+            "name": "MEMCPYHtoD",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "ConcatV2",
+                "name": "concat"
+            },
+            "pid": 9,
+            "ts": 1514883391536326,
+            "ph": "X",
+            "tid": 0,
+            "name": "ConcatV2",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "ConcatV2",
+                "name": "concat"
+            },
+            "pid": 9,
+            "ts": 1514883391536348,
+            "ph": "X",
+            "tid": 0,
+            "name": "ConcatV2",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "MEMCPYDtoH",
+                "name": "edge_35_add_1"
+            },
+            "pid": 9,
+            "ts": 1514883391537265,
+            "ph": "X",
+            "tid": 0,
+            "name": "MEMCPYDtoH",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "MEMCPYDtoH",
+                "name": "edge_37_mul_2"
+            },
+            "pid": 9,
+            "ts": 1514883391537493,
+            "ph": "X",
+            "tid": 0,
+            "name": "MEMCPYDtoH",
+            "cat": "Op"
+        },
+        {
+            "dur": 5,
+            "args": {
+                "op": "MEMCPYHtoD",
+                "name": "edge_34__arg_Placeholder_0_0"
+            },
+            "pid": 11,
+            "ts": 1514883391536000,
+            "ph": "X",
+            "tid": 0,
+            "name": "MEMCPYHtoD",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "MEMCPYDtoH",
+                "name": "edge_35_add_1"
+            },
+            "pid": 13,
+            "ts": 1514883391537265,
+            "ph": "X",
+            "tid": 0,
+            "name": "MEMCPYDtoH",
+            "cat": "Op"
+        },
+        {
+            "dur": 1,
+            "args": {
+                "op": "MEMCPYDtoH",
+                "name": "edge_37_mul_2"
+            },
+            "pid": 13,
+            "ts": 1514883391537493,
+            "ph": "X",
+            "tid": 0,
+            "name": "MEMCPYDtoH",
+            "cat": "Op"
+        }
+    ]
+}
