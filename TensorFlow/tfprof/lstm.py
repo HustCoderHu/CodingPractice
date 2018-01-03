@@ -9,13 +9,16 @@ import time
 import numpy as np
 
 import tensorflow as tf
-from tensorflow.contrib import rnn
+
+# from tensorflow.contrib import rnn
+# import tensorflow.nn
+import tensorflow.contrib.rnn as rnn
 from tensorflow.python.client import timeline
 
 FLAGS = None
 n_input = 28 # MNIST data input (img shape: 28*28)
 n_steps = 28 # timesteps
-n_hidden = 50 # hidden layer num of features
+n_hidden = 2 #50 # hidden layer num of features
 n_classes = 10 # MNIST total classes (0-9 digits)
 
 def main(_):
@@ -30,30 +33,51 @@ def main(_):
     # words_in_dataset[3] = ["is", "jumped"]
     # words_in_dataset[4] = ["quick", "high"]
     
-    batch_size = 1
+    batch_size = 3
     time_steps = 1
     num_features = 8
 
     # cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
     # cell = rnn.BasicLSTMCell(n_hidden)
-    cell = rnn.LSTMCell(n_hidden)
-    # cell = rnn.GRUCell(n_hidden)
+    # cell = rnn.LSTMCell(n_hidden)
+    cell = rnn.GRUCell(n_hidden)
     # print(cell.state_size)
     
     n_input = 10000
     n_steps = 1
     # print(n_steps * n_input)
-    inputs = tf.placeholder(tf.float32, [batch_size, n_steps * n_input])
+    # input = tf.placeholder(tf.float32, [batch_size, n_input])
+    
+    initial_state = cell.zero_state(batch_size, tf.float32)
+    
+    # output, h1 = cell.call(inputs, initial_state)
+    
+    # inputs = tf.placeholder(tf.float32, [time_steps, batch_size, n_input])
+    # outputs, states = rnn.static_rnn(cell, inputs, dtype=tf.float32)
+    
+    batch_size = 3
+    num_steps = 100
+    features = n_input = 10
+    initial_state = cell.zero_state(batch_size, tf.float32)
+    inputs = tf.placeholder(tf.float32, [batch_size, num_steps, features])
+    outputs, states = 
+        
+    # print(initial_state)
     print(inputs)
-    h0 = cell.zero_state(batch_size, tf.float32)
-    output, h1 = cell.call(inputs, h0)
+    # print(h1)
+    print(outputs)
+    
+    number_of_layers = 3
+    stacked_lstm = rnn.MultiRNNCell([rnn.LSTMCell(n_hidden) for _ in range(number_of_layers)])
+    
+    initial_state = state = stacked_lstm.zero_state(batch_size, tf.float32)
+    return 
 
     # tf.profiler.profile(
         # tf.get_default_graph(), options=tf.profiler.ProfileOptionBuilder.float_operation())
     # return 
     # np.zero, np.one
     feed2input = np.full((batch_size, n_steps * n_input), 0.)
-
     
     # with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess :
     with tf.Session() as sess :
@@ -66,11 +90,12 @@ def main(_):
         # start = time.perf_counter()
         sess.run([output, h1], feed_dict={inputs: feed2input}, 
                         options=options, run_metadata=run_metadata)
+        
         # Create the Timeline object, and write it to a json file
-        fetched_timeline = timeline.Timeline(run_metadata.step_stats)
-        chrome_trace = fetched_timeline.generate_chrome_trace_format()
-        with open('timeline_01.json', 'w') as f:
-            f.write(chrome_trace)
+        # fetched_timeline = timeline.Timeline(run_metadata.step_stats)
+        # chrome_trace = fetched_timeline.generate_chrome_trace_format()
+        # with open('input10k_gru_i3-4160.json', 'w') as f:
+            # f.write(chrome_trace)
         # elapsed = time.perf_counter() - start
     # print(result)
     print('\n')
