@@ -109,9 +109,10 @@ def main(_):
   y = tf.placeholder(tf.float32, [None, n_classes])
   # print(inputs.shape)
   # print(inputs.shape[2])
-  inputs_list = []
-  inputs_list.append(inputs)
-  logits = RNN(rnntype, inputs_list, n_hidden, n_classes)
+  # inputs_list = []
+  # inputs_list.append(inputs)
+  # logits = RNN(rnntype, inputs_list, n_hidden, n_classes)
+  logits = RNN(rnntype, [inputs], n_hidden, n_classes)
   
   # output = RNN(rnntype, inputs, n_hidden, n_classes)
 

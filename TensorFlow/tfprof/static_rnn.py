@@ -67,12 +67,18 @@ def RNN(rnntype, inputs, n_hidden, n_classes) :
   return logits
 
   
-def main(_):
+def main(argv=None):
+  if argv is None:
+    argv = sys.argv
+
   # platform = "i3-4160"
   platform = "1080ti"
   
   # net param
   n_input = 500 # 500 1000
+  n_input = int(argv[1])
+  print(n_input)
+  
   n_steps = 30
   n_hidden = 50 # hidden layer num of features
   n_classes = 10 # MNIST total classes (0-9 digits)
@@ -86,9 +92,9 @@ def main(_):
   rnntype = "GRU"
   output = RNN(rnntype, inputs, n_hidden, n_classes)
  
-  # tf.profiler.profile(
-      # tf.get_default_graph(), options=tf.profiler.ProfileOptionBuilder.float_operation())
-  # return
+  tf.profiler.profile(
+      tf.get_default_graph(), options=tf.profiler.ProfileOptionBuilder.float_operation())
+  return
   # np.zero, np.one
   feed2input = np.full((batch_size, n_steps, n_input), 0.)
   
@@ -120,8 +126,4 @@ def main(_):
   # print('Elapsed %.6f seconds.' % elapsed)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='/tmp/tensorflow/mnist/input_data',
-                        help='Directory for storing input data')
-    FLAGS, unparsed = parser.parse_known_args()
-    tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
+    main()
