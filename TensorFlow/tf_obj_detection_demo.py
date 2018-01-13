@@ -11,15 +11,23 @@ from io import StringIO
 from matplotlib import pyplot as plt
 from PIL import Image
 
-sys.path.append('E:/github_repo/models/research/object_detection')
+# RESEARCH_DIR = 'E:/github_repo/models/research'
+RESEARCH_DIR = 'D:/github_repo/models/research'
+OBJ_DET_DIR = RESEARCH_DIR + '/object_detection'
+
+sys.path.append(RESEARCH_DIR)
+sys.path.append(OBJ_DET_DIR)
 
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 
+MODEL_DIR = 'F:/Lab408/TensorFlow'
+
 def main():
-  MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
+  # os.chdir(OBJ_DET_DIR)
+  MODEL_NAME = MODEL_DIR + '/ssd_mobilenet_v1_coco_2017_11_17'
   PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
-  PATH_TO_LABELS = 'mscoco_label_map.pbtxt'
+  PATH_TO_LABELS = OBJ_DET_DIR + '/data/mscoco_label_map.pbtxt'
   NUM_CLASSES = 90
 
   # Load a (frozen) Tensorflow model into memory
@@ -38,14 +46,16 @@ def main():
       category_index = label_map_util.create_category_index(categories)
 
   # Detection
-  PATH_TO_TEST_IMAGES_DIR = 'test_images'
+  PATH_TO_TEST_IMAGES_DIR = OBJ_DET_DIR + '/test_images'
   TEST_IMAGE_PATHS = [os.path.join(PATH_TO_TEST_IMAGES_DIR, 'image{}.jpg'.format(i)) for i in range(1, 3)]
 
   # Size, in inches, of the output images.
   IMAGE_SIZE = (12, 8)
 
   with detection_graph.as_default():
-    with tf.Session(graph=detection_graph) as sess:
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(graph=detection_graph, config=config) as sess:
       # Definite input and output Tensors for detection_graph
       image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
       # Each box represents a part of the image where a particular object was detected.
