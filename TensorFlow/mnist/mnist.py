@@ -77,7 +77,7 @@ def main(_):
   # cross_entropy = tf.losses.sparse_softmax_cross_entropy(labels=y_, logits=y)
   
   with tf.name_scope('loss') : 
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=logits)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels, logits=logits)
     cross_entropy = tf.reduce_mean(cross_entropy)
   
   with tf.name_scope('adam_optimizer') :
