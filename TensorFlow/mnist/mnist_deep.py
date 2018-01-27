@@ -45,8 +45,8 @@ data_dir = r"D:\github_repo\tftest\MNIST_data"
 
 def main():
   # Import data
-  mnist = input_data.read_data_sets(data_dir, one_hot=True, 
-                                    source_url='http://yann.lecun.com/exdb/mnist/')
+  # mnist = input_data.read_data_sets(data_dir, one_hot=True,
+  #                                   source_url='http://yann.lecun.com/exdb/mnist/')
 
   # Create the model
   model = mnist_model.MobileNetV2_mnist()

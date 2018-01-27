@@ -143,12 +143,18 @@ class MobileNetV2_mnist():
   def __init__(self, is_training=True, data_format="NCHW", input_size = 28):
     self.is_training = is_training
     self.data_format = data_format
+    # self.data_format = "NHWC"
     self.input_size = input_size
     # self.normalizer = tc.layers.batch_norm
     self.bn_params = {'is_training': self.is_training}
     with tf.variable_scope("mnist"):
-      self.x = tf.placeholder(dtype=tf.float32,
-                                  shape=[None, 1, input_size, input_size])
+      if data_format == "NCHW":
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[None, 1, input_size, input_size])
+      else :
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[None, input_size, input_size, 1])
+
       self.output = self._build_model(self.x)
 
 
@@ -156,15 +162,21 @@ class MobileNetV2_mnist():
     self.i = 0
     with tf.variable_scope("init_conv") :
       # w = tf.get_variable("first_w", )
-      n_not = 16
+      n_out = 16
       data_format = "channels_first" if self.data_format == "NCHW" \
-        else "channels_last "
-      output = tf.layers.conv2d(x, n_not, kernel_size=3, strides=1,
+        else "channels_last"
+      output = tf.layers.conv2d(x, n_out, kernel_size=3, strides=1,
                                 padding="same", data_format=data_format,
                                 activation=None)
-      output = tf.contrib.layers.batch_norm(x, activation_fn=tf.nn.relu6,
+      print(output.shape)
+      output2 = tf.contrib.layers.batch_norm(x, activation_fn=None,
                                             is_training=self.is_training,
                                             data_format=self.data_format)
+      # output2 = tf.contrib.layers.batch_norm(x, activation_fn=tf.nn.relu6,
+      #                                        is_training=self.is_training,
+      #                                        data_format=self.data_format)
+      print(output2.shape)
+      return
       output = self._inverted_bottleneck(output, 4, 32, subsample=False)
       output = self._inverted_bottleneck(output, 4, 32, subsample=False)
       output = self._inverted_bottleneck(output, 1, 10, subsample=True)
@@ -181,9 +193,12 @@ class MobileNetV2_mnist():
   def _inverted_bottleneck(self, x, rate_channels, channels, subsample):
     init = tf.contrib.layers.xavier_initializer(dtype=tf.float32)
     in_shape = x.shape
-    n_in = in_shape[1] if self.data_format=="NCHW" else in_shape[-1]
+    n_in = in_shape[1]
     print(type(n_in))
-    print(n_in)
+    n_in = in_shape[1] if self.data_format=="NCHW" else in_shape[-1]
+    n_in = int(n_in)
+    # print(type(n_in))
+    # print(n_in)
     stride = 2 if subsample else 1
     with tf.name_scope("inverted_bottleneck_{}_{}_{}".format(
       self.i, rate_channels, subsample ) ) :
@@ -205,10 +220,14 @@ class MobileNetV2_mnist():
       #                       padding="SAME", data_format=self.data_format)
       # 3x3 depthwise
       n_in = n_out
+      print(n_in)
+      print(n_out)
       w3x3 = tf.get_variable("w3x3", [3, 3, n_in, n_out], initializer=init)
       # b3x3 = b1x1 = tf.get_variable("b3x3", [n_out], initializer=init)
-      output = tf.nn.depthwise_conv2d(x, w3x3, strides=[1, 1, stride, stride],
-                                      padding="same", data_format=self.data_format)
+      # output = tf.nn.depthwise_conv2d(x, w3x3, strides=[1, 1, stride, stride],
+      #                                 padding="SAME", data_format=self.data_format)
+      output = tf.nn.depthwise_conv2d(x, w3x3, strides=[1, 1, 1, 1],
+                                      padding="SAME", data_format=self.data_format)
       output = tf.contrib.layers.batch_norm(x, activation_fn=tf.nn.relu6,
                                             is_training=self.is_training,
                                             data_format=self.data_format)
