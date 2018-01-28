@@ -41,19 +41,26 @@ sys.path.append(cwd)
 import mnist_model
 
 FLAGS = None
-data_dir = r"D:\github_repo\tftest\MNIST_data"
+mnist_dir = r"E:\github_repo\tftest\mnist"
+model_dir = path.join(mnist_dir, "model")
+data_dir = path.join(mnist_dir, "MNIST_data")
 
 def main():
-  # Import data
-  # mnist = input_data.read_data_sets(data_dir, one_hot=True,
-  #                                   source_url='http://yann.lecun.com/exdb/mnist/')
-
-  # Create the model
-  model = mnist_model.MobileNetV2_mnist()
+  test_mobileV2_mnist()
   return
 
+  return
+
+def default_lenet(x):
+
+  # Import data
+  mnist = input_data.read_data_sets(data_dir, one_hot=True,
+                                    source_url=
+                                    'http://yann.lecun.com/exdb/mnist/')
+
+  # Create the model
+
   # Define loss and optimizer
-  # y_ = tf.placeholder(tf.int64, [None])
   y_ = tf.placeholder(tf.float32, [None, 10])
 
   # Build the graph for the deep net
@@ -66,7 +73,7 @@ def main():
     cross_entropy = tf.reduce_mean(cross_entropy)
 
   with tf.name_scope('adam_optimizer'):
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+    train_op = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
   with tf.name_scope('accuracy'):
     correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(y_, 1))
@@ -84,7 +91,7 @@ def main():
   # Add ops to save and restore all the variables.
   saver = tf.train.Saver()
 
-  model_dir = r"D:\github_repo\tftest\mnist_deep_model"
+
 
   config = tf.ConfigProto()
   # config.gpu_options.allow_growth = True
@@ -100,10 +107,16 @@ def main():
     for i in range(max_iter):
       batch = mnist.train.next_batch(batch_size)
       if i % 100 == 0:
-        train_accuracy = acc.eval(feed_dict={
-            x: batch[0], y_: batch[1], keep_prob: 1.0})
-        print('iter %d, training accuracy %g' % (i, train_accuracy))
-      train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+        print("iter {}: ".format(i))
+        train_acc = acc.eval(feed_dict={ model.is_training: True,
+            x: batch[0], y_: batch[1] })
+        print('  training accuracy %g' % train_acc)
+        test_batch = mnist.test.next_batch(batch_size)
+        test_acc = acc.eval(feed_dict={ model.is_training: False,
+            model.x: test_batch[0], y_: test_batch[1] })
+        print('  test accuracy %g' % test_acc)
+
+      train_op.run(feed_dict={model.x: batch[0], y_: batch[1], keep_prob: 0.5})
       if i % snapshot_intval == 0 and i > 0:
         _prefix = "iter-{}".format(i)
         ckpt_path = path.join(model_dir, _prefix)
@@ -135,8 +148,108 @@ def main():
 
     # with tf.variable_scope('accuracy', reuse=True) :
     #   acc = tf.get_variable(name="acc")
-    print('whole val set accuracy %g' % accuracy.eval(feed_dict={
-      x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+    whole_acc = acc.eval(feed_dict={ model.is_training: False,
+                                    model.x: mnist.test.images,
+                                    y_: mnist.test.labels })
+    print('whole val set accuracy %g' % whole_acc)
+
+def test_mobileV2_mnist():
+  # Import data
+  mnist = input_data.read_data_sets(data_dir, one_hot=True,
+                                    source_url=
+                                    'http://yann.lecun.com/exdb/mnist/')
+  # Create the model
+  model = mnist_model.MobileNetV2_mnist(data_format="NHWC")
+
+  y_ = tf.placeholder(tf.float32, [None, 10])
+  with tf.name_scope('loss'):
+    # cross_entropy = tf.losses.sparse_softmax_cross_entropy(
+        # labels=y_, logits=y_conv)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=model.output)
+    # cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
+    cross_entropy = tf.reduce_mean(cross_entropy)
+
+  # for bn
+  update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+  with tf.control_dependencies(update_ops):
+    with tf.name_scope('adam_optimizer'):
+      train_op = tf.train.AdamOptimizer(1e-1).minimize(cross_entropy)
+
+  with tf.name_scope('accuracy'):
+    correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(y_, 1))
+    correct_prediction = tf.cast(correct_prediction, tf.float32)
+    acc = tf.reduce_mean(correct_prediction, name="acc")
+
+  saver = tf.train.Saver()
+
+  batch_size = 40
+  max_iter = int(55000 / batch_size * 1)
+  test_interval = 4
+  snapshot_intval = 500
+  display = 2
+
+  config = tf.ConfigProto()
+  with tf.Session(config = config) as sess:
+    sess.run(tf.global_variables_initializer())
+    for i in range(max_iter):
+      batch = mnist.train.next_batch(batch_size)
+      if i % test_interval == 0:
+        test_batch = mnist.test.next_batch(batch_size)
+        # loss = cross_entropy.eval(feed_dict={ model.is_training: True,
+        #                                       model.x: batch[0], y_: batch[1] })
+        # train_acc = acc.eval(feed_dict={ model.is_training: False,
+        #     model.x: batch[0], y_: batch[1] })
+
+        test_acc = acc.eval(feed_dict={ model.is_training: False,
+            model.x: test_batch[0], y_: test_batch[1] })
+        print("-- iter {}: ".format(i))
+        # print('  training accuracy: %g' % train_acc)
+        print('--   test accuracy: %g' % test_acc)
+
+      # tf.Session.run()
+      if i % display == 0 and i != 0:
+        loss, = sess.run([cross_entropy], feed_dict={model.is_training: True,
+                                       model.x: batch[0], y_: batch[1]})
+        # loss = train_op.run([cross_entropy],
+        #                     feed_dict={model.is_training: True,
+        #                                model.x: batch[0], y_: batch[1]})
+        print("iter {}: ".format(i))
+        print("  loss: %g" % loss)
+      else :
+        train_op.run(feed_dict={model.is_training: True,
+                                model.x: batch[0], y_: batch[1]})
+      if i % snapshot_intval == 0 and i != 0:
+        _prefix = "iter-{}".format(i)
+        ckpt_path = path.join(model_dir, _prefix)
+        save_path = saver.save(sess, ckpt_path)
+        print("--- snapshot to {}".format(save_path))
+    # train finish
+    _prefix = "iter-{}".format(max_iter - 1)
+    ckpt_path = path.join(model_dir, _prefix)
+    save_path = saver.save(sess, ckpt_path)
+    print("snapshot to {}".format(save_path))
+    # error on my 750ti
+    # Allocator (GPU_0_bfc) ran out of memory trying to allocate 957.03MiB
+    # Resource exhausted: OOM when allocating tensor with shape[10000,32,28,28]
+    # print('whole val set accuracy %g' % accuracy.eval(feed_dict={
+    #   x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+  print("----------------------------")
+  print("save_path: {}".format(save_path))
+  print("begin test")
+
+  with tf.Session(config = config) as sess:
+    # iter = max_iter - max_iter % snapshot_intval
+    _prefix = "iter-{}".format(max_iter - 1)
+    # meta_path = path.join(model_dir, _prefix + ".meta")
+    # new_saver = tf.train.import_meta_graph(meta_path)
+    saver.restore(sess, save_path)
+
+    # with tf.variable_scope('accuracy', reuse=True) :
+    #   acc = tf.get_variable(name="acc")
+    whole_acc = acc.eval(feed_dict={ model.is_training: False,
+                                    model.x: mnist.test.images,
+                                    y_: mnist.test.labels })
+    print('whole val set accuracy %g' % whole_acc)
 
 if __name__ == '__main__':
   main()

@@ -39,7 +39,8 @@ def main():
 
   # y_conv, keep_prob = lenet(x)
 
-
+  # Create the model
+  model = MobileNetV2_mnist()
   return
 
 
@@ -140,111 +141,129 @@ def bias_variable(shape):
   return tf.Variable(initial)
 
 class MobileNetV2_mnist():
-  def __init__(self, is_training=True, data_format="NCHW", input_size = 28):
-    self.is_training = is_training
+  def __init__(self, data_format="NCHW", input_size = 28):
     self.data_format = data_format
     # self.data_format = "NHWC"
     self.input_size = input_size
     # self.normalizer = tc.layers.batch_norm
-    self.bn_params = {'is_training': self.is_training}
     with tf.variable_scope("mnist"):
-      if data_format == "NCHW":
-        self.x = tf.placeholder(dtype=tf.float32,
-                                shape=[None, 1, input_size, input_size])
-      else :
-        self.x = tf.placeholder(dtype=tf.float32,
-                                shape=[None, input_size, input_size, 1])
-
+      self.is_training = tf.placeholder(tf.bool)
+      self.x = tf.placeholder(dtype=tf.float32,
+                              shape=[None, 784])
       self.output = self._build_model(self.x)
 
 
   def _build_model(self, x):
     self.i = 0
+    with tf.name_scope('reshape'):
+      if self.data_format == "NCHW":
+        x_image = tf.reshape(x, [-1, 1, 28, 28])
+      else :
+        x_image = tf.reshape(x, [-1, 28, 28, 1])
+
     with tf.variable_scope("init_conv") :
       # w = tf.get_variable("first_w", )
-      n_out = 16
+      n_out = 32
       data_format = "channels_first" if self.data_format == "NCHW" \
         else "channels_last"
-      output = tf.layers.conv2d(x, n_out, kernel_size=3, strides=1,
+      output = tf.layers.conv2d(x_image, n_out, kernel_size=3, strides=1,
                                 padding="same", data_format=data_format,
                                 activation=None)
-      print(output.shape)
-      output2 = tf.contrib.layers.batch_norm(x, activation_fn=None,
-                                            is_training=self.is_training,
-                                            data_format=self.data_format)
-      # output2 = tf.contrib.layers.batch_norm(x, activation_fn=tf.nn.relu6,
-      #                                        is_training=self.is_training,
-      #                                        data_format=self.data_format)
-      print(output2.shape)
-      return
-      output = self._inverted_bottleneck(output, 4, 32, subsample=False)
-      output = self._inverted_bottleneck(output, 4, 32, subsample=False)
-      output = self._inverted_bottleneck(output, 1, 10, subsample=True)
+      # print(output.shape)
+      output = self._BN(output)
+      output = tf.nn.relu6(output)
+
+      # print(output.shape)
+      output = self._inverted_bottleneck(output, 2, 64, subsample=False)
+      # output = self._inverted_bottleneck(output, 4, 32, subsample=False)
+      output = self._inverted_bottleneck(output, 2, 10, subsample=True)
       pool_size = output.shape[2:4] if self.data_format=="NCHW" \
         else output.shape[1:3]
-      data_format = "channels_first" if self.data_format == "NCHW" \
-        else "channels_last "
-      output = tf.layers.average_pooling2d(output, pool_size, strides=None,
+      output = tf.layers.average_pooling2d(output, pool_size, strides=1,
                                            data_format=data_format)
-      print(output.shape)
+      # print(output.shape)
+      output = tf.reshape(output, [-1, 10])
       return output
 
+  def _BN(self, input):
+    axis = 1 if self.data_format=="NCHW" else -1
+    out = tf.layers.batch_normalization(input, axis=axis, scale=False,
+                                        training=self.is_training,
+                                        fused=True)
+    # output = tf.contrib.layers.batch_norm(input, activation_fn=tf.nn.relu6,
+    #                                        is_training=self.is_training,
+    #                                        data_format=self.data_format)
+    return out
 
   def _inverted_bottleneck(self, x, rate_channels, channels, subsample):
     init = tf.contrib.layers.xavier_initializer(dtype=tf.float32)
+    stride = 2 if subsample else 1
+
     in_shape = x.shape
-    n_in = in_shape[1]
-    print(type(n_in))
-    n_in = in_shape[1] if self.data_format=="NCHW" else in_shape[-1]
-    n_in = int(n_in)
+    if self.data_format == "NCHW":
+      x_channels = in_shape[1]
+      strides_4d = [1, 1, stride, stride]
+    else :
+      x_channels = in_shape[-1]
+      strides_4d = [1, stride, stride, 1]
+
+    n_in = int(x_channels)
     # print(type(n_in))
     # print(n_in)
-    stride = 2 if subsample else 1
-    with tf.name_scope("inverted_bottleneck_{}_{}_{}".format(
+    # 3x3 dw
+    channel_multiplier = 1
+
+    with tf.variable_scope("inverted_bottleneck_{}_{}_{}".format(
       self.i, rate_channels, subsample ) ) :
+      if x_channels == channels:
+        if stride == 2:
+          w3x3 = tf.get_variable("w3x3_br0", [3, 3, x_channels, channel_multiplier],
+                                 initializer=init)
+          branch_0 = tf.nn.depthwise_conv2d(x, w3x3, strides=strides_4d,
+                                            padding="SAME",
+                                            data_format=self.data_format)
+          branch_0 = self._BN(branch_0)
+        else :
+          branch_0 = x
+
       # 1x1 pointwise
       n_out = rate_channels * n_in
       data_format = "channels_first" if self.data_format=="NCHW" \
-        else "channels_last "
-      output = tf.layers.conv2d(x, n_out, kernel_size=1, strides=stride,
+        else "channels_last"
+      branch_1 = tf.layers.conv2d(x, n_out, kernel_size=1, strides=1,
                        padding="same", data_format=data_format,
                        activation=None, use_bias=False,
                        kernel_initializer=init)
-      output = tf.contrib.layers.batch_norm(x, activation_fn=tf.nn.relu6,
-                                            is_training=self.is_training,
-                                            data_format=self.data_format)
-      # output = tf.layers.batch_normalization(x, )
+      branch_1 = self._BN(branch_1)
+      branch_1 = tf.nn.relu6(branch_1)
       # w1x1 = tf.get_variable("w1x1", [1, 1, n_in, n_out], initializer=init)
       # b1x1 = tf.get_variable("b1x1", [n_out], initializer=init)
-      # output = tf.nn.conv2d(x, w1x1, strides=[1, 1, stride, stride],
+      # branch_1 = tf.nn.conv2d(x, w1x1, strides=[1, 1, stride, stride],
       #                       padding="SAME", data_format=self.data_format)
       # 3x3 depthwise
       n_in = n_out
-      print(n_in)
-      print(n_out)
-      w3x3 = tf.get_variable("w3x3", [3, 3, n_in, n_out], initializer=init)
+      # print(n_in)
+
+      # print(n_out)
+      w3x3 = tf.get_variable("w3x3_br1", [3, 3, n_in, channel_multiplier],
+                             initializer=init)
       # b3x3 = b1x1 = tf.get_variable("b3x3", [n_out], initializer=init)
-      # output = tf.nn.depthwise_conv2d(x, w3x3, strides=[1, 1, stride, stride],
-      #                                 padding="SAME", data_format=self.data_format)
-      output = tf.nn.depthwise_conv2d(x, w3x3, strides=[1, 1, 1, 1],
+      branch_1 = tf.nn.depthwise_conv2d(branch_1, w3x3, strides=strides_4d,
                                       padding="SAME", data_format=self.data_format)
-      output = tf.contrib.layers.batch_norm(x, activation_fn=tf.nn.relu6,
-                                            is_training=self.is_training,
-                                            data_format=self.data_format)
+      branch_1 = self._BN(branch_1)
+      branch_1 = tf.nn.relu6(branch_1)
       # 1x1
       n_out = channels
-      output = tf.layers.conv2d(x, n_out, kernel_size=1, strides=stride,
+      branch_1 = tf.layers.conv2d(branch_1, n_out, kernel_size=1, strides=1,
                                 padding="same", data_format=data_format,
                                 activation=None, use_bias=False,
                                 kernel_initializer=init)
-      # w1x1_1 = tf.get_variable("w1x1_1", [1, 1, n_in, n_out], initializer=init)
-      # b1x1_1 = tf.get_variable("b1x1_1", [n_out], initializer=init)
-      # output = tf.nn.conv2d(x, w1x1_1, strides=[1, 1, stride, stride],
-      #                       padding="SAME", data_format=self.data_format)
-      output = tf.contrib.layers.batch_norm(x, activation_fn=None,
-                                            is_training=self.is_training,
-                                            data_format=self.data_format)
-      output = tf.add(x, output)
+      branch_1 = self._BN(branch_1)
+      # print(self.i)
+      if x_channels == channels:
+        output = tf.add(branch_0, branch_1)
+      else :
+        output = branch_1
     self.i += 1
     return output
 
