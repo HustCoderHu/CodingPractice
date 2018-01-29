@@ -28,6 +28,7 @@ https://www.tensorflow.org/get_started/mnist/pros
 # import time
 
 import tensorflow as tf
+import tensorflow.contrib as tc
 
 def main():
   # Create the model
@@ -44,117 +45,103 @@ def main():
   return
 
 
-def lenet(x):
-  """deepnn builds the graph for a deep net for classifying digits.
-
-  Args:
-    x: an input tensor with the dimensions (N_examples, 784), where 784 is the
-    number of pixels in a standard MNIST image.
-
-  Returns:
-    A tuple (y, keep_prob). y is a tensor of shape (N_examples, 10), with values
-    equal to the logits of classifying the digit into one of 10 classes (the
-    digits 0-9). keep_prob is a scalar placeholder for the probability of
-    dropout.
-  """
-  # Reshape to use within a convolutional neural net.
-  # Last dimension is for "features" - there is only one here, since images are
-  # grayscale -- it would be 3 for an RGB image, 4 for RGBA, etc.
-  with tf.name_scope('reshape'):
-    x_image = tf.reshape(x, [-1, 1, 28, 28])
-    # print(x_image.shape)
-
-  # First convolutional layer - maps one grayscale image to 32 feature maps.
-  n_in = 1
-  n_out = 32
-  with tf.name_scope('conv1'):
-    W_conv1 = weight_variable([5, 5, n_in, n_out])
-    b_conv1 = bias_variable([n_out])
-    conv_res = conv2d(x_image, W_conv1)
-    conv_res = tf.nn.bias_add(conv_res, b_conv1, data_format="NCHW")
-    h_conv1 = tf.nn.relu(conv_res)
-
-  # Pooling layer - downsamples by 2X.
-  with tf.name_scope('pool1'):
-    h_pool1 = max_pool_2x2(h_conv1)
-
-  # Second convolutional layer -- maps 32 feature maps to 64.
-  n_in = n_out
-  n_out = 64
-  with tf.name_scope('conv2'):
-    W_conv2 = weight_variable([5, 5, n_in, n_out])
-    b_conv2 = bias_variable([n_out])
-    conv_res = conv2d(h_pool1, W_conv2)
-    conv_res = tf.nn.bias_add(conv_res, b_conv2, data_format="NCHW")
-    h_conv2 = tf.nn.relu(conv_res)
-
-  # Second pooling layer.
-  with tf.name_scope('pool2'):
-    h_pool2 = max_pool_2x2(h_conv2)
-
-  # Fully connected layer 1 -- after 2 round of downsampling, our 28x28 image
-  # is down to 7x7x64 feature maps -- maps this to 1024 features.
-  n_in = n_out
-  n_out = 1024
-  with tf.name_scope('fc1'):
-    h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * n_in])
-    W_fc1 = weight_variable([n_in * 7 * 7, n_out])
-    # b_fc1 = bias_variable([n_out])
-    # print(W_fc1.shape)
-    # wfc1_shape = W_fc1.shape
-    h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1))
-
-  # Dropout - controls the complexity of the model, prevents co-adaptation of
-  # features.
-  with tf.name_scope('dropout'):
-    keep_prob = tf.placeholder(tf.float32)
-    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
-
-  # Map the 1024 features to 10 classes, one for each digit
-  n_in = n_out
-  n_out = 10
-  with tf.name_scope('fc2'):
-    W_fc2 = weight_variable([n_in, n_out])
-    # b_fc2 = bias_variable([n_out])
-    y_conv = tf.matmul(h_fc1_drop, W_fc2)
-  return y_conv, keep_prob
-
-def conv2d(x, W):
-  """conv2d returns a 2d convolution layer with full stride."""
-  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME',
-                      data_format="NCHW")
-
-def max_pool_2x2(x):
-  """max_pool_2x2 downsamples a feature map by 2X."""
-  return tf.nn.max_pool(x, ksize=[1, 1, 2, 2],
-                        strides=[1, 1, 2, 2], padding='SAME',
-                        data_format="NCHW")
-
-def weight_variable(shape):
-  """weight_variable generates a weight variable of a given shape."""
-  initial = tf.truncated_normal(shape, stddev=0.1)
-  return tf.Variable(initial)
-
-def bias_variable(shape):
-  """bias_variable generates a bias variable of a given shape."""
-  initial = tf.constant(0.1, shape=shape)
-  return tf.Variable(initial)
-
-class MobileNetV2_mnist():
-  def __init__(self, data_format="NCHW", input_size = 28):
+class lenet():
+  def __init__(self, data_format="NCHW", batch_size=0, input_size = 28):
     self.data_format = data_format
     # self.data_format = "NHWC"
     self.input_size = input_size
     # self.normalizer = tc.layers.batch_norm
     with tf.variable_scope("mnist"):
       self.is_training = tf.placeholder(tf.bool)
-      self.x = tf.placeholder(dtype=tf.float32,
-                              shape=[None, 784])
+      self.keep_prob = tf.placeholder(tf.float32)
+      if batch_size != 0 :
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[batch_size, 784])
+      else :
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[None, 784])
+      self.output = self._build_model(self.x)
+
+  def _build_model(self, x):
+    # self.i = 0
+    init = tc.layers.xavier_initializer(dtype=tf.float32)
+    data_format = "channels_first" if self.data_format == "NCHW" \
+      else "channels_last"
+    with tf.name_scope('reshape'):
+      if self.data_format == "NCHW":
+        x_image = tf.reshape(x, [-1, 1, 28, 28])
+      else:
+        x_image = tf.reshape(x, [-1, 28, 28, 1])
+    with tf.name_scope("conv1_relu") :
+      knl_size = 5
+      n_out = 32
+      out = tf.layers.conv2d(x_image, n_out, knl_size, strides=1,
+                             padding="same", data_format=data_format,
+                             activation=tf.nn.relu, use_bias=True,
+                             kernel_initializer=init,
+                             bias_initializer=init)
+    # Pooling layer - downsamples by 2X.
+    with tf.name_scope("pool1") :
+      out = tf.layers.max_pooling2d(out, pool_size=2, strides=2,
+                                    padding="same",
+                                    data_format=data_format)
+    # Second convolutional layer -- maps 32 feature maps to 64.
+    with tf.name_scope("conv2_relu") :
+      knl_size = 5
+      n_out = 32
+      out = tf.layers.conv2d(out, n_out, knl_size, strides=1,
+                             padding="same", data_format=data_format,
+                             activation=tf.nn.relu, use_bias=True,
+                             kernel_initializer=init,
+                             bias_initializer=init)
+    # Second pooling layer.
+    with tf.name_scope("pool2") :
+      out = tf.layers.max_pooling2d(out, pool_size=2, strides=2,
+                                    padding="same",
+                                    data_format=data_format)
+    with tf.name_scope('fc1') :
+      print(out.shape)
+      n_in = n_out
+      n_out = 1024
+      size_per_batch = out.shape[1] * out.shape[2] * out.shape[3]
+
+      flat_out = tf.reshape(out, [-1, size_per_batch])
+      out = tf.layers.dense(flat_out, n_out, activation=tf.nn.relu,
+                            use_bias=False, kernel_initializer=init)
+    # Dropout - controls the complexity of the model, prevents co-adaptation of
+    # features.
+    with tf.name_scope("dropout") :
+      out = tf.layers.dropout(out, rate=self.keep_prob,
+                              training=self.is_training)
+    # Map the 1024 features to 10 classes, one for each digit
+    with tf.name_scope('fc2') :
+      n_out = 10
+      out = tf.layers.dense(out, n_out, activation=None,
+                            use_bias=False, kernel_initializer=init)
+    return out
+
+class MobileNetV2_mnist():
+  def __init__(self, data_format="NCHW", batch_size=0, input_size = 28):
+    self.data_format = data_format
+    # self.data_format = "NHWC"
+    self.input_size = input_size
+    # self.normalizer = tc.layers.batch_norm
+    with tf.variable_scope("mnist"):
+      self.is_training = tf.placeholder(tf.bool)
+      if batch_size != 0 :
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[batch_size, 784])
+      else :
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[None, 784])
       self.output = self._build_model(self.x)
 
 
   def _build_model(self, x):
     self.i = 0
+    data_format = "channels_first" if self.data_format == "NCHW" \
+      else "channels_last"
+
     with tf.name_scope('reshape'):
       if self.data_format == "NCHW":
         x_image = tf.reshape(x, [-1, 1, 28, 28])
@@ -162,23 +149,23 @@ class MobileNetV2_mnist():
         x_image = tf.reshape(x, [-1, 28, 28, 1])
 
     with tf.variable_scope("init_conv") :
-      # w = tf.get_variable("first_w", )
       n_out = 32
-      data_format = "channels_first" if self.data_format == "NCHW" \
-        else "channels_last"
-      output = tf.layers.conv2d(x_image, n_out, kernel_size=3, strides=1,
+      output = tf.layers.conv2d(x_image, n_out, kernel_size=1, strides=1,
                                 padding="same", data_format=data_format,
                                 activation=None)
-      # print(output.shape)
-      output = self._BN(output)
+    #   output = self._BN(output)
       output = tf.nn.relu6(output)
 
+    output = x_image
+    with tf.variable_scope("body") :
       # print(output.shape)
-      output = self._inverted_bottleneck(output, 2, 64, subsample=False)
-      # output = self._inverted_bottleneck(output, 4, 32, subsample=False)
-      output = self._inverted_bottleneck(output, 2, 10, subsample=True)
+      # output = self._inverted_bottleneck(output, 32, 32, subsample=False)
+      output = self._inverted_bottleneck(output, 4, 32, subsample=False)
+      # output = self._inverted_bottleneck(output, 2, 10, subsample=True)
+      output = self._inverted_bottleneck(output, 4, 10, subsample=False)
       pool_size = output.shape[2:4] if self.data_format=="NCHW" \
         else output.shape[1:3]
+    with tf.variable_scope("end") :
       output = tf.layers.average_pooling2d(output, pool_size, strides=1,
                                            data_format=data_format)
       # print(output.shape)
@@ -222,7 +209,7 @@ class MobileNetV2_mnist():
           branch_0 = tf.nn.depthwise_conv2d(x, w3x3, strides=strides_4d,
                                             padding="SAME",
                                             data_format=self.data_format)
-          branch_0 = self._BN(branch_0)
+          # branch_0 = self._BN(branch_0)
         else :
           branch_0 = x
 
@@ -234,7 +221,7 @@ class MobileNetV2_mnist():
                        padding="same", data_format=data_format,
                        activation=None, use_bias=False,
                        kernel_initializer=init)
-      branch_1 = self._BN(branch_1)
+      # branch_1 = self._BN(branch_1)
       branch_1 = tf.nn.relu6(branch_1)
       # w1x1 = tf.get_variable("w1x1", [1, 1, n_in, n_out], initializer=init)
       # b1x1 = tf.get_variable("b1x1", [n_out], initializer=init)
@@ -250,7 +237,7 @@ class MobileNetV2_mnist():
       # b3x3 = b1x1 = tf.get_variable("b3x3", [n_out], initializer=init)
       branch_1 = tf.nn.depthwise_conv2d(branch_1, w3x3, strides=strides_4d,
                                       padding="SAME", data_format=self.data_format)
-      branch_1 = self._BN(branch_1)
+      # branch_1 = self._BN(branch_1)
       branch_1 = tf.nn.relu6(branch_1)
       # 1x1
       n_out = channels
@@ -258,7 +245,7 @@ class MobileNetV2_mnist():
                                 padding="same", data_format=data_format,
                                 activation=None, use_bias=False,
                                 kernel_initializer=init)
-      branch_1 = self._BN(branch_1)
+      # branch_1 = self._BN(branch_1)
       # print(self.i)
       if x_channels == channels:
         output = tf.add(branch_0, branch_1)
@@ -266,9 +253,75 @@ class MobileNetV2_mnist():
         output = branch_1
     self.i += 1
     return output
-
 # end class MobileNetV2_mnist
 
+class fcn_lenet():
+  def __init__(self, data_format="NCHW", batch_size=0, input_size=28):
+    self.data_format = data_format
+    # self.data_format = "NHWC"
+    self.input_size = input_size
+    # self.normalizer = tc.layers.batch_norm
+    with tf.variable_scope("mnist"):
+      if batch_size != 0:
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[batch_size, 784])
+      else:
+        self.x = tf.placeholder(dtype=tf.float32,
+                                shape=[None, 784])
+      self.output = self._build_model(self.x)
+    return
+
+  def _build_model(self, x):
+    init = tc.layers.xavier_initializer(dtype=tf.float32)
+    data_format = "channels_first" if self.data_format == "NCHW" \
+      else "channels_last"
+    with tf.name_scope('reshape'):
+      if self.data_format == "NCHW":
+        x_image = tf.reshape(x, [-1, 1, 28, 28])
+      else:
+        x_image = tf.reshape(x, [-1, 28, 28, 1])
+    with tf.name_scope("conv1_relu") :
+      knl_size = 5
+      n_out = 32
+      out = tf.layers.conv2d(x_image, n_out, knl_size, strides=1,
+                             padding="same", data_format=data_format,
+                             activation=tf.nn.relu, use_bias=True,
+                             kernel_initializer=init,
+                             bias_initializer=init)
+    # Pooling layer - downsamples by 2X.
+    with tf.name_scope("pool1") :
+      out = tf.layers.max_pooling2d(out, pool_size=2, strides=2,
+                                    padding="same",
+                                    data_format=data_format)
+    # Second convolutional layer -- maps 32 feature maps to 64.
+    with tf.name_scope("conv2_relu") :
+      knl_size = 5
+      n_out = 32
+      out = tf.layers.conv2d(out, n_out, knl_size, strides=1,
+                             padding="same", data_format=data_format,
+                             activation=tf.nn.relu, use_bias=True,
+                             kernel_initializer=init,
+                             bias_initializer=init)
+    # Second pooling layer.
+    with tf.name_scope("pool2") :
+      out = tf.layers.max_pooling2d(out, pool_size=2, strides=2,
+                                    padding="same",
+                                    data_format=data_format)
+    with tf.name_scope("pointwise") :
+      knl_size = 1
+      n_out = 10
+      out = tf.layers.conv2d(out, n_out, knl_size, strides=1,
+                             padding="same", data_format=data_format,
+                             activation=None, use_bias=True,
+                             kernel_initializer=init,
+                             bias_initializer=init)
+    pool_size = out.shape[2:4] if self.data_format == "NCHW" \
+      else out.shape[1:3]
+    with tf.name_scope("global_avg_pool") :
+      out = tf.layers.average_pooling2d(out, pool_size, strides=1,
+                                        data_format=data_format)
+    out = tf.reshape(out, [-1, 10])
+    return out
 
 if __name__ == '__main__':
   main()
