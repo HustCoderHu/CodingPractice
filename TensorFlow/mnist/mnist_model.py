@@ -28,6 +28,7 @@ https://www.tensorflow.org/get_started/mnist/pros
 # import time
 
 import tensorflow as tf
+from tensorflow import layers
 import tensorflow.contrib as tc
 
 def main():
@@ -100,7 +101,6 @@ class lenet():
                                     padding="same",
                                     data_format=data_format)
     with tf.name_scope('fc1') :
-      print(out.shape)
       n_in = n_out
       n_out = 1024
       size_per_batch = out.shape[1] * out.shape[2] * out.shape[3]
@@ -149,23 +149,23 @@ class MobileNetV2_mnist():
         x_image = tf.reshape(x, [-1, 28, 28, 1])
 
     with tf.variable_scope("init_conv") :
-      n_out = 32
+      n_out = 16
       output = tf.layers.conv2d(x_image, n_out, kernel_size=1, strides=1,
                                 padding="same", data_format=data_format,
                                 activation=None)
     #   output = self._BN(output)
       output = tf.nn.relu6(output)
 
-    output = x_image
+    # output = x_image
     with tf.variable_scope("body") :
       # print(output.shape)
       # output = self._inverted_bottleneck(output, 32, 32, subsample=False)
-      output = self._inverted_bottleneck(output, 4, 32, subsample=False)
+      output = self._inverted_bottleneck(output, 6, 32, subsample=False)
       # output = self._inverted_bottleneck(output, 2, 10, subsample=True)
-      output = self._inverted_bottleneck(output, 4, 10, subsample=False)
+      output = self._inverted_bottleneck(output, 3, 10, subsample=False)
       pool_size = output.shape[2:4] if self.data_format=="NCHW" \
         else output.shape[1:3]
-    with tf.variable_scope("end") :
+    with tf.variable_scope("global_avg_pool") :
       output = tf.layers.average_pooling2d(output, pool_size, strides=1,
                                            data_format=data_format)
       # print(output.shape)
@@ -307,6 +307,9 @@ class fcn_lenet():
       out = tf.layers.max_pooling2d(out, pool_size=2, strides=2,
                                     padding="same",
                                     data_format=data_format)
+    with tf.name_scope("depthwise") :
+      out = layers.conv2d(out, 64, 3, strides=1, padding='same',
+          data_format=data_format, use_bias=False, kernel_initializer=init)
     with tf.name_scope("pointwise") :
       knl_size = 1
       n_out = 10

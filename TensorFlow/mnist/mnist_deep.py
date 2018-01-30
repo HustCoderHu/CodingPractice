@@ -36,8 +36,8 @@ import json
 import numpy as np
 
 from tensorflow.examples.tutorials.mnist import input_data
-
 import tensorflow as tf
+from tensorflow import layers
 
 cwd = os.getcwd()
 sys.path.append(cwd)
@@ -46,9 +46,10 @@ import mnist_model
 FLAGS = None
 mnist_dir = r"E:\github_repo\tftest\mnist"
 model_dir = path.join(mnist_dir, "model")
+SavedModel_dir= path.join(mnist_dir, "SavedModel")
 data_dir = path.join(mnist_dir, "MNIST_data")
 
-batch_size = 100
+batch_size = 50
 max_iter = int(55000 / batch_size * 1)
 test_interval = 20
 snapshot_intval = 500
@@ -56,17 +57,18 @@ display = 10
 keep_prob = 0.5
 
 def main():
-  # test_mobileV2_mnist()
+  test_mobileV2_mnist()
   # test_mobileV2_mnist(profile=True)
-  # default_lenet(profile=True)
-  test_fcn_lenet()
+  # default_lenet()
+  # test_fcn_lenet()
 
   return
 
-def default_lenet(profile=False):
+def default_lenet():
   # Create the model
   data_format = "NHWC"
   model = mnist_model.lenet(data_format)
+
   # Define loss and optimizer
   y_ = tf.placeholder(tf.float32, [None, 10])
   # Build the graph for the deep net
@@ -75,6 +77,7 @@ def default_lenet(profile=False):
     correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(y_, 1))
     correct_prediction = tf.cast(correct_prediction, tf.float32)
     acc = tf.reduce_mean(correct_prediction, name="acc")
+  tf.summary.scalar('accuracy', acc)
 
   with tf.name_scope('loss'):
     # cross_entropy = tf.losses.sparse_softmax_cross_entropy(
@@ -82,17 +85,25 @@ def default_lenet(profile=False):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=model.output)
     # cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
     cross_entropy = tf.reduce_mean(cross_entropy)
+  tf.summary.scalar('cross_entropy', cross_entropy)
 
   with tf.name_scope('adam_optimizer'):
-    train_op = tf.train.AdamOptimizer(1e-2).minimize(cross_entropy)
-
+    optimizer = tf.train.AdamOptimizer(1e-2)
+    train_op = optimizer.minimize(cross_entropy)
+  tf.summary.scalar('lr', optimizer._lr_t)
   # print(cross_entropy.name) # loss/Mean:0
   # print(accuracy.name) # accuracy/acc:0
   # graph_location = tempfile.mkdtemp()
-  graph_location = r"D:\github_repo\tftest\mnist_deep_log"
-  print('Saving graph to: %s' % graph_location)
-  train_writer = tf.summary.FileWriter(graph_location)
+
+  # graph_location = r"D:\github_repo\tftest\mnist_deep_log"
+  # print('Saving graph to: %s' % graph_location)
+  # train_writer = tf.summary.FileWriter(graph_location)
+  LOG_DIR = path.join(mnist_dir, "log-default_lenet")
+  train_dir = path.join(LOG_DIR, "train")
+  train_writer = tf.summary.FileWriter(train_dir)
   train_writer.add_graph(tf.get_default_graph())
+  test_dir = path.join(LOG_DIR, "test")
+  test_writer = tf.summary.FileWriter(test_dir)
 
   # Add ops to save and restore all the variables.
   saver = tf.train.Saver()
@@ -102,41 +113,45 @@ def default_lenet(profile=False):
                                     source_url=
                                     'http://yann.lecun.com/exdb/mnist/')
 
-  # batch_size = 40
-  # max_iter = int(55000 / batch_size * 1)
-  # test_interval = 4
-  # snapshot_intval = 500
-  # display = 2
-  # keep_prob = 0.5
-
+  merged = tf.summary.merge_all()
+ 
   config = tf.ConfigProto()
   # config.gpu_options.allow_growth = True
   config.gpu_options.per_process_gpu_memory_fraction = 0.75
   with tf.Session(config = config) as sess:
-    sess.run(tf.global_variables_initializer())
+    tf.global_variables_initializer().run()
     for i in range(max_iter):
       batch = mnist.train.next_batch(batch_size)
       if i % test_interval == 0:
         test_batch = mnist.test.next_batch(batch_size)
-        test_acc = acc.eval(feed_dict={model.is_training: False,
-                                       model.keep_prob: keep_prob,
-                                       model.x: test_batch[0], y_: test_batch[1]})
+        summary, test_acc = sess.run([merged, acc], feed_dict={model.is_training: False,
+            model.keep_prob: keep_prob, model.x: test_batch[0], y_: test_batch[1]})
+        test_writer.add_summary(summary, i)
+        # test_acc = acc.eval(feed_dict={model.is_training: False,
+                                      #  model.keep_prob: keep_prob,
+                                      #  model.x: test_batch[0], y_: test_batch[1]})
         print("-- iter {}: ".format(i))
         # print('  training accuracy: %g' % train_acc)
         print('--   test accuracy: %g' % test_acc)
-
-      if i % display == 0 and i != 0:
-        loss, = sess.run([cross_entropy], feed_dict={model.is_training: True,
-                                                     model.keep_prob: keep_prob,
-                                                     model.x: batch[0],
-                                                     y_: batch[1] })
-        print("iter {}: ".format(i))
-        print("  loss: %g" % loss)
       else :
-        train_op.run(feed_dict={model.is_training: True,
-                                model.keep_prob: keep_prob, model.x: batch[0],
-                                y_: batch[1] })
-
+        summary, _, loss = sess.run([merged, train_op, cross_entropy],
+            feed_dict={model.is_training: True, model.keep_prob: keep_prob,
+                model.x: batch[0], y_: batch[1] })
+        train_writer.add_summary(summary, i)
+        if i % display == 0 and i != 0:
+          print("iter {}: ".format(i))
+          print("  loss: %g" % loss)
+      # if i % display == 0 and i != 0:
+      #   loss, = sess.run([cross_entropy], feed_dict={model.is_training: True,
+      #                                                model.keep_prob: keep_prob,
+      #                                                model.x: batch[0],
+      #                                                y_: batch[1] })
+      #   print("iter {}: ".format(i))
+      #   print("  loss: %g" % loss)
+      # else :
+      #   train_op.run(feed_dict={model.is_training: True,
+      #                           model.keep_prob: keep_prob, model.x: batch[0],
+      #                           y_: batch[1] })
       if i % snapshot_intval == 0 and i != 0:
         _prefix = "iter-{}".format(i)
         ckpt_path = path.join(model_dir, _prefix)
@@ -165,10 +180,10 @@ def default_lenet(profile=False):
 
     # with tf.variable_scope('accuracy', reuse=True) :
     #   acc = tf.get_variable(name="acc")
-    whole_acc = acc.eval(feed_dict={model.is_training: False,
-                                    model.keep_prob: keep_prob,
-                                    model.x: mnist.test.images,
-                                    y_: mnist.test.labels })
+    # whole_acc = acc.eval(feed_dict={model.is_training: False,
+    #                                 model.keep_prob: keep_prob,
+    #                                 model.x: mnist.test.images,
+    #                                 y_: mnist.test.labels })
     print('whole val set accuracy %g' % whole_acc)
   return
 
@@ -184,6 +199,7 @@ def test_fcn_lenet() :
     correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(y_, 1))
     correct_prediction = tf.cast(correct_prediction, tf.float32)
     acc = tf.reduce_mean(correct_prediction, name="acc")
+  tf.summary.scalar('accuracy', acc)
 
   with tf.name_scope('loss'):
     # cross_entropy = tf.losses.sparse_softmax_cross_entropy(
@@ -191,17 +207,26 @@ def test_fcn_lenet() :
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=model.output)
     # cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
     cross_entropy = tf.reduce_mean(cross_entropy)
+  tf.summary.scalar('cross_entropy', cross_entropy)
 
   with tf.name_scope('adam_optimizer'):
-    train_op = tf.train.AdamOptimizer(1e-2).minimize(cross_entropy)
+    optimizer = tf.train.AdamOptimizer(1e-2)
+    train_op = optimizer.minimize(cross_entropy)
+  tf.summary.scalar('lr', optimizer._lr_t)
 
   # print(cross_entropy.name) # loss/Mean:0
   # print(accuracy.name) # accuracy/acc:0
   # graph_location = tempfile.mkdtemp()
-  graph_location = r"D:\github_repo\tftest\mnist_deep_log"
-  print('Saving graph to: %s' % graph_location)
-  train_writer = tf.summary.FileWriter(graph_location)
+  # graph_location = r"D:\github_repo\tftest\mnist_deep_log"
+  # print('Saving graph to: %s' % graph_location)
+  # train_writer = tf.summary.FileWriter(graph_location)
+  # train_writer.add_graph(tf.get_default_graph())
+  LOG_DIR = path.join(mnist_dir, "log-fcn_lenet-tmp")
+  train_dir = path.join(LOG_DIR, "train")
+  train_writer = tf.summary.FileWriter(train_dir)
   train_writer.add_graph(tf.get_default_graph())
+  test_dir = path.join(LOG_DIR, "test")
+  test_writer = tf.summary.FileWriter(test_dir)
 
   # Add ops to save and restore all the variables.
   saver = tf.train.Saver()
@@ -211,30 +236,39 @@ def test_fcn_lenet() :
                                     source_url=
                                     'http://yann.lecun.com/exdb/mnist/')
 
+  merged = tf.summary.merge_all()
   config = tf.ConfigProto()
   # config.gpu_options.allow_growth = True
   config.gpu_options.per_process_gpu_memory_fraction = 0.75
   with tf.Session(config=config) as sess:
-    sess.run(tf.global_variables_initializer())
+    tf.global_variables_initializer().run()
     for i in range(max_iter):
       batch = mnist.train.next_batch(batch_size)
       if i % test_interval == 0:
         test_batch = mnist.test.next_batch(batch_size)
-        test_acc = acc.eval(feed_dict={model.x: test_batch[0],
-                                       y_: test_batch[1]})
+        summary, test_acc = sess.run([merged, acc], feed_dict={
+            model.x: test_batch[0], y_: test_batch[1] })
+        test_writer.add_summary(summary, i)
+        # test_acc = acc.eval(feed_dict={model.x: test_batch[0],
+                                      #  y_: test_batch[1]})
         print("-- iter {}: ".format(i))
         # print('  training accuracy: %g' % train_acc)
         print('--   test accuracy: %g' % test_acc)
-
-      if i % display == 0 and i != 0:
-        loss, = sess.run([cross_entropy], feed_dict={model.x: batch[0],
-                                                     y_: batch[1]})
-        print("iter {}: ".format(i))
-        print("  loss: %g" % loss)
-      else:
-        train_op.run(feed_dict={model.x: batch[0],
-                                y_: batch[1]})
-
+      else :
+        summary, _, loss = sess.run([merged, train_op, cross_entropy],
+            feed_dict={ model.x: batch[0], y_: batch[1] })
+        train_writer.add_summary(summary, i)
+        if i % display == 0 and i != 0:
+          print("iter {}: ".format(i))
+          print("  loss: %g" % loss)
+      # if i % display == 0 and i != 0:
+      #   loss, = sess.run([cross_entropy], feed_dict={model.x: batch[0],
+      #                                                y_: batch[1]})
+      #   print("iter {}: ".format(i))
+      #   print("  loss: %g" % loss)
+      # else:
+      #   train_op.run(feed_dict={model.x: batch[0],
+      #                           y_: batch[1]})
       if i % snapshot_intval == 0 and i != 0:
         _prefix = "iter-{}".format(i)
         ckpt_path = path.join(model_dir, _prefix)
@@ -263,8 +297,9 @@ def test_fcn_lenet() :
 
     # with tf.variable_scope('accuracy', reuse=True) :
     #   acc = tf.get_variable(name="acc")
-    whole_acc = acc.eval(feed_dict={model.x: mnist.test.images,
-                                    y_: mnist.test.labels})
+    # whole_acc = acc.eval(feed_dict={model.x: mnist.test.images,
+                                    # y_: mnist.test.labels})
+    whole_acc = 0  
     print('whole val set accuracy %g' % whole_acc)
   return
 
@@ -273,31 +308,46 @@ def test_mobileV2_mnist():
   model = mnist_model.MobileNetV2_mnist(data_format="NHWC")
 
   y_ = tf.placeholder(tf.float32, [None, 10])
+  
+  with tf.name_scope('accuracy'):
+    correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(y_, 1))
+    correct_prediction = tf.cast(correct_prediction, tf.float32)
+    acc = tf.reduce_mean(correct_prediction, name="acc")
+  tf.summary.scalar('accuracy', acc)
+
   with tf.name_scope('loss'):
     # cross_entropy = tf.losses.sparse_softmax_cross_entropy(
         # labels=y_, logits=y_conv)
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=model.output)
     # cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
     cross_entropy = tf.reduce_mean(cross_entropy)
-
+  tf.summary.scalar('cross_entropy', cross_entropy)
   # for bn
   update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
   with tf.control_dependencies(update_ops) :
     with tf.name_scope('adam_optimizer') :
-      train_op = tf.train.AdamOptimizer(1e-1).minimize(cross_entropy)
+      optimizer = tf.train.AdamOptimizer(5e-2)
+      train_op = optimizer.minimize(cross_entropy)
+  # tf.summary.scalar('lr', optimizer._lr_t)
 
-  with tf.name_scope('accuracy'):
-    correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(y_, 1))
-    correct_prediction = tf.cast(correct_prediction, tf.float32)
-    acc = tf.reduce_mean(correct_prediction, name="acc")
+  LOG_DIR = path.join(mnist_dir, "log-mobileV2_lenet")
+  if not os.path.exists(LOG_DIR):
+    os.mkdir(LOG_DIR)
+  train_dir = path.join(LOG_DIR, "train")
+  train_writer = tf.summary.FileWriter(train_dir)
+  train_writer.add_graph(tf.get_default_graph())
+  test_dir = path.join(LOG_DIR, "test")
+  test_writer = tf.summary.FileWriter(test_dir)
 
   saver = tf.train.Saver()
+  builder = tf.saved_model.builder.SavedModelBuilder(SavedModel_dir)
 
   # Import data
   mnist = input_data.read_data_sets(data_dir, one_hot=True,
                                     source_url=
                                     'http://yann.lecun.com/exdb/mnist/')
 
+  merged = tf.summary.merge_all()
   config = tf.ConfigProto()
   # config.gpu_options.allow_growth = True
   config.gpu_options.per_process_gpu_memory_fraction = 0.75
@@ -305,36 +355,44 @@ def test_mobileV2_mnist():
     sess.run(tf.global_variables_initializer())
     for i in range(max_iter):
       batch = mnist.train.next_batch(batch_size)
+      summary, _, loss = sess.run([merged, train_op, cross_entropy],
+          feed_dict={model.is_training: True, model.x: batch[0], y_: batch[1] })
+      train_writer.add_summary(summary, i)
+      if i % display == 0 and i != 0:
+          print("iter {}: ".format(i))
+          print("  loss: %g" % loss)
+      # test
       if i % test_interval == 0:
         test_batch = mnist.test.next_batch(batch_size)
         # loss = cross_entropy.eval(feed_dict={ model.is_training: True,
         #                                       model.x: batch[0], y_: batch[1] })
         # train_acc = acc.eval(feed_dict={ model.is_training: False,
         #     model.x: batch[0], y_: batch[1] })
-
-        test_acc = acc.eval(feed_dict={ model.is_training: False,
-            model.x: test_batch[0], y_: test_batch[1] })
-        print("-- iter {}: ".format(i))
+        summary, test_acc = sess.run([merged, acc], feed_dict={model.is_training: False,
+            model.x: test_batch[0], y_: test_batch[1]})
+        # test_acc = acc.eval(feed_dict={ model.is_training: False,
+        #     model.x: test_batch[0], y_: test_batch[1] })
+        test_writer.add_summary(summary, i)
+        # print("-- iter {}: ".format(i))
         # print('  training accuracy: %g' % train_acc)
-        print('--   test accuracy: %g' % test_acc)
+        print('--  test accuracy: %g' % test_acc)
 
-      # tf.Session.run()
-      if i % display == 0 and i != 0:
-        loss = sess.run(cross_entropy, feed_dict={model.is_training: True,
-                                       model.x: batch[0], y_: batch[1]})
-        # loss = train_op.run([cross_entropy],
-        #                     feed_dict={model.is_training: True,
-        #                                model.x: batch[0], y_: batch[1]})
-        print("iter {}: ".format(i))
-        print("  loss: %g" % loss)
-      else :
-        train_op.run(feed_dict={model.is_training: True,
-                                model.x: batch[0], y_: batch[1]})
+      # if i % display == 0 and i != 0:
+      #   loss = sess.run(cross_entropy, feed_dict={model.is_training: True,
+      #                                  model.x: batch[0], y_: batch[1]})
+      #   # loss = train_op.run([cross_entropy],
+      #   #                     feed_dict={model.is_training: True,
+      #   #                                model.x: batch[0], y_: batch[1]})
+      #   print("iter {}: ".format(i))
+      #   print("  loss: %g" % loss)
+      # else :
+      #   train_op.run(feed_dict={model.is_training: True,
+      #                           model.x: batch[0], y_: batch[1]})
       if i % snapshot_intval == 0 and i != 0:
-        _prefix = "iter-{}".format(i)
-        ckpt_path = path.join(model_dir, _prefix)
-        save_path = saver.save(sess, ckpt_path)
-        print("--- snapshot to {}".format(save_path))
+        # _prefix = "iter-{}".format(i)
+        # ckpt_path = path.join(model_dir, _prefix)
+        # save_path = saver.save(sess, ckpt_path)
+        # print("--- snapshot to {}".format(save_path))
     # train finish
     _prefix = "iter-{}".format(max_iter - 1)
     ckpt_path = path.join(model_dir, _prefix)
@@ -345,8 +403,8 @@ def test_mobileV2_mnist():
     # Resource exhausted: OOM when allocating tensor with shape[10000,32,28,28]
     # print('whole val set accuracy %g' % accuracy.eval(feed_dict={
     #   x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+  return
   print("----------------------------")
-  print("save_path: {}".format(save_path))
   print("begin test")
 
   # tf.reset_default_graph()
