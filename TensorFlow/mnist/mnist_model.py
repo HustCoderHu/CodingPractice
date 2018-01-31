@@ -295,8 +295,8 @@ class fcn_lenet():
                                     data_format=data_format)
     # Second convolutional layer -- maps 32 feature maps to 64.
     with tf.name_scope("conv2_relu") :
-      knl_size = 5
-      n_out = 32
+      knl_size = 3
+      n_out = 64
       out = tf.layers.conv2d(out, n_out, knl_size, strides=1,
                              padding="same", data_format=data_format,
                              activation=tf.nn.relu, use_bias=True,
@@ -307,9 +307,18 @@ class fcn_lenet():
       out = tf.layers.max_pooling2d(out, pool_size=2, strides=2,
                                     padding="same",
                                     data_format=data_format)
-    with tf.name_scope("depthwise") :
-      out = layers.conv2d(out, 64, 3, strides=1, padding='same',
-          data_format=data_format, use_bias=False, kernel_initializer=init)
+    with tf.name_scope("depthwise_relu6") :
+      n_in = n_out
+      channel_multiplier = 1
+      strides_4d = [1, 1, 1, 1]
+      w3x3 = tf.get_variable("dw3x3", [3, 3, n_in, channel_multiplier],
+                             initializer=init)
+      out = tf.nn.depthwise_conv2d(out, w3x3, strides=strides_4d, 
+          padding="SAME", data_format=self.data_format)
+      out = tf.nn.relu6(out)
+      # out = layers.conv2d(out, 64, 3, strides=1, padding='same',
+      #     data_format=data_format, use_bias=False, kernel_initializer=init)
+
     with tf.name_scope("pointwise") :
       knl_size = 1
       n_out = 10

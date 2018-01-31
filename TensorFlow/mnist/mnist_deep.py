@@ -33,7 +33,9 @@ import os
 import os.path as path
 import time
 import json
+# import numpy as np
 import numpy as np
+import json
 
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
@@ -57,10 +59,10 @@ display = 10
 keep_prob = 0.5
 
 def main():
-  test_mobileV2_mnist()
+  # test_mobileV2_mnist()
   # test_mobileV2_mnist(profile=True)
   # default_lenet()
-  # test_fcn_lenet()
+  test_fcn_lenet()
 
   return
 
@@ -221,7 +223,7 @@ def test_fcn_lenet() :
   # print('Saving graph to: %s' % graph_location)
   # train_writer = tf.summary.FileWriter(graph_location)
   # train_writer.add_graph(tf.get_default_graph())
-  LOG_DIR = path.join(mnist_dir, "log-fcn_lenet-tmp")
+  LOG_DIR = path.join(mnist_dir, "log-fcn_lenet")
   train_dir = path.join(LOG_DIR, "train")
   train_writer = tf.summary.FileWriter(train_dir)
   train_writer.add_graph(tf.get_default_graph())
@@ -244,36 +246,24 @@ def test_fcn_lenet() :
     tf.global_variables_initializer().run()
     for i in range(max_iter):
       batch = mnist.train.next_batch(batch_size)
+      summary, _, loss = sess.run([merged, train_op, cross_entropy],
+          feed_dict={model.x: batch[0], y_: batch[1] })
+      train_writer.add_summary(summary, i)
+      if i % display == 0 and i != 0:
+        print("iter {}: ".format(i))
+        print("  loss: %g" % loss)
+      # test
       if i % test_interval == 0:
-        test_batch = mnist.test.next_batch(batch_size)
+        batch = mnist.test.next_batch(batch_size)
         summary, test_acc = sess.run([merged, acc], feed_dict={
-            model.x: test_batch[0], y_: test_batch[1] })
+            model.x: batch[0], y_: batch[1]})
         test_writer.add_summary(summary, i)
-        # test_acc = acc.eval(feed_dict={model.x: test_batch[0],
-                                      #  y_: test_batch[1]})
-        print("-- iter {}: ".format(i))
-        # print('  training accuracy: %g' % train_acc)
-        print('--   test accuracy: %g' % test_acc)
-      else :
-        summary, _, loss = sess.run([merged, train_op, cross_entropy],
-            feed_dict={ model.x: batch[0], y_: batch[1] })
-        train_writer.add_summary(summary, i)
-        if i % display == 0 and i != 0:
-          print("iter {}: ".format(i))
-          print("  loss: %g" % loss)
-      # if i % display == 0 and i != 0:
-      #   loss, = sess.run([cross_entropy], feed_dict={model.x: batch[0],
-      #                                                y_: batch[1]})
-      #   print("iter {}: ".format(i))
-      #   print("  loss: %g" % loss)
-      # else:
-      #   train_op.run(feed_dict={model.x: batch[0],
-      #                           y_: batch[1]})
+        print('--  test accuracy: %g' % test_acc)
       if i % snapshot_intval == 0 and i != 0:
         _prefix = "iter-{}".format(i)
         ckpt_path = path.join(model_dir, _prefix)
         save_path = saver.save(sess, ckpt_path)
-        print("--- snapshot to {}".format(save_path))
+        print("=== snapshot to {}".format(save_path))
     # train finish
     _prefix = "iter-{}".format(max_iter - 1)
     ckpt_path = path.join(model_dir, _prefix)
@@ -284,6 +274,8 @@ def test_fcn_lenet() :
     # Resource exhausted: OOM when allocating tensor with shape[10000,32,28,28]
     # print('whole val set accuracy %g' % accuracy.eval(feed_dict={
     #   x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
+  return
+
   print("----------------------------")
   print("save_path: {}".format(save_path))
   print("begin test")
@@ -389,10 +381,11 @@ def test_mobileV2_mnist():
       #   train_op.run(feed_dict={model.is_training: True,
       #                           model.x: batch[0], y_: batch[1]})
       if i % snapshot_intval == 0 and i != 0:
-        # _prefix = "iter-{}".format(i)
-        # ckpt_path = path.join(model_dir, _prefix)
-        # save_path = saver.save(sess, ckpt_path)
-        # print("--- snapshot to {}".format(save_path))
+        _prefix = "iter-{}".format(i)
+        ckpt_path = path.join(model_dir, _prefix)
+        save_path = saver.save(sess, ckpt_path)
+        print("--- snapshot to {}".format(save_path))
+
     # train finish
     _prefix = "iter-{}".format(max_iter - 1)
     ckpt_path = path.join(model_dir, _prefix)
