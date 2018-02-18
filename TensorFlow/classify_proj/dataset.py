@@ -1,5 +1,6 @@
 import os
 import os.path as path
+from os.path import join as pjoin
 import tensorflow as tf
 
 class MyDataset():
@@ -26,19 +27,25 @@ class MyDataset():
   
   def eval(self, batch_sz = 10, prefetch_batch=None):
     print('eval ===========')
-    return self._get(self.eval_dir, batch_sz, prefetch_batch,
-        repeat=False)
+    return self._get(self.eval_dir, batch_sz, prefetch_batch)
+    # return self._get(self.eval_dir, batch_sz, prefetch_batch,
+        # repeat=False)
 
 
   def _get(self, subset_dir, batch_sz, prefetch_batch=None, repeat=True):
-    labels = os.listdir(subset_dir)
+    _labels = os.listdir(subset_dir)
+    labels = []
+    for lb in _labels:
+      if path.isdir(pjoin(subset_dir, lb)):
+        labels.append(lb)
+
     img_list = []
     label_list = []
     for class_name in labels:
-      per_class_dir = path.join(subset_dir, class_name)
+      per_class_dir = pjoin(subset_dir, class_name)
       per_class_imglist = os.listdir(per_class_dir)
       print('{}: total {}'.format(class_name, len(per_class_imglist)))
-      _list = [path.join(per_class_dir, i) for i in per_class_imglist]
+      _list = [pjoin(per_class_dir, i) for i in per_class_imglist]
       img_list.extend(_list)
       label_list.extend(
           [self.dict_name_id[class_name]] * len(per_class_imglist))
@@ -94,10 +101,10 @@ def ___get(self, sub_dir):
   img_list = []
   label_list = []
   for class_id, class_name in enumerate(labels):
-    per_class_dir = path.join(dir, class_name)
+    per_class_dir = pjoin(dir, class_name)
     per_class_imglist = os.listdir(per_class_dir)
     print('{}: total {}'.format(class_name, len(per_class_imglist)))
-    _list = [path.join(per_class_dir, i) for i in per_class_imglist]
+    _list = [pjoin(per_class_dir, i) for i in per_class_imglist]
     img_list.extend(_list)
     label_list.extend([class_id] * len(per_class_imglist))
   
