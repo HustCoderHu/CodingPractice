@@ -5,25 +5,26 @@ import tensorflow as tf
 
 import dataset
 import simple_model as smodel
+import runhooks
 
 
 def main():
 
-  train_dir = r'F:\Lab408\jinzhengu\root\resized\train'
-  eval_dir = r'F:\Lab408\jinzhengu\root\resized\eval'
+  train_dir = r'F:\Lab408\jinzhengu\root\shuffled_divided\train'
+  eval_dir = r'F:\Lab408\jinzhengu\root\shuffled_divided\eval'
   log_dir = r'F:\Lab408\jinzhengu\root\monitored_sess_log'
   ckpt_dir = path.join(log_dir, 'ckpts')
   # model_dir = r'F:\Lab408\jinzhengu\root\monitored_sess_log'
   
-  eval_interval = 25
+  eval_interval = 20
   
   save_summary_steps = 5
-  save_ckpts_steps = 20
+  save_ckpts_steps = 100
   train_batchsz = 20
-  eval_batchsz = 20
+  eval_batchsz = 50
   # eval_steps = 40
-  epoch = 30
-  img_num = 1105
+  epoch = 900
+  img_num = 870 * 2
   max_steps = (img_num * epoch) // train_batchsz
 
 
@@ -47,6 +48,7 @@ def main():
   # next_elem = iter.get_next()
   inputx, labels, filename = iter.get_next()
   inputx = tf.reshape(inputx, [-1, 200, 250, 3])
+  inputx = tf.transpose(inputx, [0, 3, 1, 2]) # nchw
   # eval_x.set_shape([eval_batchsz, 200, 250, 3])
 
   # train_x, train_y, train_fname = dset.train(train_batchsz, prefetch_batch)
@@ -55,7 +57,8 @@ def main():
   # eval_x.set_shape([eval_batchsz, 200, 250, 3])
 
   # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ build graph \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-  model = smodel.Simplest('NHWC')
+  model = smodel.Simplest('NCHW')
+  # model = smodel.Simplest('NHWC')
   logits = model(inputx)
   with tf.name_scope('cross_entropy'):
     loss = tf.losses.sparse_softmax_cross_entropy(labels, logits)
@@ -110,8 +113,8 @@ def main():
   #   summary_op= merged_op
   # )
   
-  # >>>  eval
-  eval_hook = _EvalHook(
+  # >>> main run hook
+  eval_hook = runhooks.RunHook(
     iter_dict= iter_dict,
     eval_steps= eval_interval,
     train_op= train_op,
@@ -122,15 +125,19 @@ def main():
   )
 
   # >>>  checkpoit saver
-  ckpt_saver_hook = tf.train.CheckpointSaverHook(
-    checkpoint_dir= ckpt_dir,
-    save_steps= save_ckpts_steps,
+  ckpt_saver_hook = runhooks.CkptSaverHook(
+    ckpt_dir,
+    save_steps= save_ckpts_steps
   )
+  # ckpt_saver_hook = tf.train.CheckpointSaverHook(
+  #   checkpoint_dir= ckpt_dir,
+  #   save_steps= save_ckpts_steps,
+  # )
 
   all_hooks = [
       # logging_hook,
       # summary_hook,
-      # eval_hook,
+      eval_hook,
       ckpt_saver_hook,
       # tf.train.StopAtStepHook(max_steps),
       # tf.train.NanTensorHook(loss)
@@ -157,7 +164,8 @@ def main():
     stop_grace_period_secs= 3600
     ) as mon_sess:
     while not mon_sess.should_stop():
-      training, step = mon_sess.run([model.training, tf.train.get_global_step()]) # arg from retval of _EvalHook before_run()
+      step = mon_sess.run(tf.train.get_global_step()) # arg from retval of _EvalHook before_run()
+      # training, step = mon_sess.run([model.training, tf.train.get_global_step()]) # arg from retval of _EvalHook before_run()
       # if not training:
         # print('step {}: eval xxxxxxxxx'.format(step))
       # print(lr)
@@ -165,103 +173,6 @@ def main():
 
 
 
-class _EvalHook(tf.train.SessionRunHook):
-  def __init__(self,
-    iter_dict,
-    eval_steps,
-    train_op,
-    training,
-    holder_handle,
-    summary_conf,
-    summary_protobuf,
-  ):
-    """
-    args:
-    - iter_dict
-        {'train': dataset.make_iter, 'eval': same}
-    - summary_conf
-        dict {'dir': dir, 'saved_steps': int}
-    - summary_protobuf dict:
-        'name' -> protobuf returned by tf.summary.x (x in scalar, hisogram etc)
-    """
-    self.tensor_handle = {
-      'train': iter_dict['train'].string_handle(),
-      'eval': iter_dict['eval'].string_handle()
-    }
-    self.iter_dict = iter_dict
-    self.eval_steps_ = eval_steps
-    self.eval_marker = True
-    self.train_op_ = train_op
-    self.training_ = training
-    self.holder_handle_ = holder_handle
-    self.summary_save_steps = summary_conf['saved_steps']
-
-    # summary
-    train_summary = path.join(summary_conf['dir'], 'train')
-    eval_summary = path.join(summary_conf['dir'], 'eval')
-
-    self.summary_writer_= {
-      'train': tf.summary.FileWriterCache.get(train_summary),
-      'eval':  tf.summary.FileWriterCache.get(eval_summary)
-    }
-    self.merged_summary_ = tf.summary.merge(list(summary_protobuf.values()))
-    return
-  
-  def begin(self):
-    self.global_step_tensor_ = tf.train.get_or_create_global_step()
-    # pylint: disable=protected-access
-    if self.global_step_tensor_ is None:
-      raise RuntimeError(
-          "Global step should be created to use _EvalHook.")
-    # self._start_time = time.time()
-    return
-  
-  def after_create_session(self, session, coord):
-    self.global_step = session.run(self.global_step_tensor_)
-    # print('global step: {}'.format(self.global_step))
-    self.train_handle = session.run(
-        self.tensor_handle['train'])
-    self.eval_handle = session.run(
-        self.tensor_handle['eval'])
-
-  def before_run(self, run_context):
-    # print('self.global_step: {}'.format(self.global_step))
-    request = {'summary_str': self.merged_summary_}
-    if self.global_step % self.eval_steps_ == 0 :
-      feed_dict={
-        self.holder_handle_: self.eval_handle,
-        self.training_: False
-      }
-    else:
-      request['train_op'] = self.train_op_
-      feed_dict={
-        self.holder_handle_: self.train_handle,
-        self.training_: True
-      }
-    return tf.train.SessionRunArgs(fetches= request,
-        feed_dict= feed_dict)
-
-  def after_run(self, run_context, run_values):
-    # run_values type tf.train.SessionRunValues
-    req_dict = run_values.result
-    # [1] tensorflow.core.protobuf.config_pb2.RunOptions
-    # [2] tensorflow.core.protobuf.config_pb2.RunMetadata
-    if self.global_step % self.eval_steps_ == 0 \
-        and self.eval_marker :
-      self.summary_writer_['eval'].add_summary(
-        req_dict['summary_str'], self.global_step)
-      self.eval_marker = False
-    else :
-      if self.global_step % self.summary_save_steps == 0 :
-        self.summary_writer_['train'].add_summary(
-          req_dict['summary_str'], self.global_step)
-      self.global_step += 1
-      self.eval_marker = True
-  
-  def end(self, session):
-    self.summary_writer_['train'].flush()
-    self.summary_writer_['eval'].flush()
-# end class _EvalHook
 
 if __name__ == '__main__':
   main()
