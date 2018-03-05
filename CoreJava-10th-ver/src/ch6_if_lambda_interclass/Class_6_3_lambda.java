@@ -24,7 +24,9 @@ public class Class_6_3_lambda {
 
     // 函数式接口
     String[] words = {"Bob", "Alice", "Carl", "Amy"};
-    Arrays.sort(words, (_1st, _2nd) -> _1st.length() - _2nd.length());
+//    Arrays.sort(words, Comparator.comparing(String::length));
+    Arrays.sort(words, Comparator.comparingInt(String::length));
+//    Arrays.sort(words, (_1st, _2nd) -> _1st.length() - _2nd.length());
     System.out.println(Arrays.toString(words));
 
     BiFunction<String, String, Integer> comp2
@@ -39,13 +41,17 @@ public class Class_6_3_lambda {
     Arrays.sort(words, String::compareToIgnoreCase);
     System.out.println(Arrays.toString(words));
 
-    ArrayList<String> names = new ArrayList<>();
+    ArrayList<String> names = new ArrayList<>(words.length);
+    names.ensureCapacity(words.length);
     for (String s : words)
       names.add(s);
 //    Stream<Person> strm = names.stream().map(Person::new);
 //    List<Person> people = strm.collect(Collectors.toList());
 //    Object[] people = strm.toArray();
 //    Person[] people = strm.toArray(Person[]::new);
+    // 先比较姓 再比较名
+//    Arrays.sort(people, Comparator.comparing(Person::getLastName)
+//      .thenComparing(Person::getFirstName));
     repeat(3, ()-> System.out.println("hello, world!"));
     repeat2(3, i -> System.out.println("countdown: " + (2 - i)));
     String aaa = "abc";
@@ -64,9 +70,20 @@ public class Class_6_3_lambda {
   }
 
   private class Person {
+    public String lastName;
+    public String firstName;
     public String name;
-    String getName() {
+
+    public String getName() {
       return name;
+    }
+
+    public String getFirstName() {
+      return firstName;
+    }
+
+    public String getLastName() {
+      return lastName;
     }
   }
 }

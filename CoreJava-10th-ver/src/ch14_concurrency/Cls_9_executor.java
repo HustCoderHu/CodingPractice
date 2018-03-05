@@ -1,16 +1,17 @@
 package ch14_concurrency;
 
+import javax.lang.model.type.NullType;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.List;
+import java.util.concurrent.*;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class Cls_9_executor {
   public static void main(String[] args) {
   }
-  
+
 }
 
 class Callaable_Future {
@@ -34,11 +35,55 @@ class Callaable_Future {
   }
 }
 class MatchCounter implements Callable<Integer> {
-  public MatchCounter(File dir, String keyword) {
+  private File dir;
+  private String keyword;
+  private ExecutorService pool;
+  public MatchCounter(File _dir, String _keyword, ExecutorService _pool) {
+    dir = _dir;
+    keyword = _keyword;
+    pool = _pool;
   }
 
   @Override
   public Integer call() {
+    // 使用相同的递归机制
     return null;
+  }
+}
+
+class ThreadPool {
+  public static void test() {
+//    dir.listFiles();
+    int nTasks = 20;
+    ExecutorService tp = Executors.newFixedThreadPool(4);
+    List<Future<Integer>> results = new ArrayList<>(nTasks);
+    final MAX_FILES = 3000;
+    List<File> fileQueue = new ArrayList<>(MAX_FILES);
+
+    File dir = new File("/etc");
+    MatchCounter counter = new MatchCounter(dir, "host", tp);
+
+    for (int i = 0; i < 20; ++i) {
+      results.add(tp.submit(counter));
+    }
+
+    tp.shutdown();
+    int cnt = 0;
+    for (Future<Integer> res : results) {
+      try {
+        cnt += res.get();
+      } catch (ExecutionException e) {
+        e.printStackTrace();
+      } catch (InterruptedException e) {
+        e.getMessage();
+      }
+
+    }
+
+//    try {
+//      for (int i = 0; i < 20; ++i)
+//        cnt = results.get(i).get().intValue();
+//    } catch (ExecutionException e)
+//      e.printStack
   }
 }
