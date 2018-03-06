@@ -21,11 +21,11 @@ class Callaable_Future {
   // Future 保存计算结果
   public static void test() throws InterruptedException, ExecutionException {
 //    Callable<Integer> mycomput = ;
-    MatchCounter mycomput = new MatchCounter(new File("/etc"),
-            "host");
-    FutureTask<Integer> task = new FutureTask<>(mycomput);
-    Thread t = new Thread(task);
-    t.start();
+//    MatchCounter mycomput = new MatchCounter(new File("/etc"),
+//            "host");
+//    FutureTask<Integer> task = new FutureTask<>(mycomput);
+//    Thread t = new Thread(task);
+//    t.start();
 //    ...
 //    Integer res = task.get(); // 阻塞
     long count = 0;
@@ -57,7 +57,7 @@ class ThreadPool {
     int nTasks = 20;
     ExecutorService tp = Executors.newFixedThreadPool(4);
     List<Future<Integer>> results = new ArrayList<>(nTasks);
-    final MAX_FILES = 3000;
+    final int MAX_FILES = 3000;
     List<File> fileQueue = new ArrayList<>(MAX_FILES);
 
     File dir = new File("/etc");
@@ -68,6 +68,10 @@ class ThreadPool {
     }
 
     tp.shutdown();
+    tp.shutdownNow(); // Attempts to stop all actively executing tasks,
+    // halts the processing of waiting tasks,
+    // and returns a list of the tasks that were awaiting execution.
+    // This method does not wait for actively executing tasks to terminate
     int cnt = 0;
     for (Future<Integer> res : results) {
       try {
