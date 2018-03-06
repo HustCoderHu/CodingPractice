@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.*;
 
-public class Cls_14_6_blockQueue {
+public class Cls_6_blockQueue {
   private static final int FILE_QUEUE_SZ = 10;
   private static final int SEARCH_THREAD = 100;
   private static final File DUMMY = new File("");

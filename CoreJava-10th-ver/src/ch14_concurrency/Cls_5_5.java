@@ -12,7 +12,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class Cls_14_5_5 {
+public class Cls_5_5 {
   public static void main(String[] args) {
     long id = nextNum.incrementAndGet(); // return ++i; atomic
 
