@@ -1,5 +1,9 @@
 import javax.print.attribute.standard.PrinterLocation;
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Q5 {
   // 从尾到头打印链表
@@ -26,13 +30,15 @@ public class Q5 {
       listNode = listNode.next;
     }
     arr.trimToSize();
-    int arrSize = arr.size();
-    int bound = arr.size()/2;
-    for (int i = 0; i < bound; ++i) { // 交换
-      Integer tmp = arr.get(i);
-      arr.set(i, arr.get(arrSize-i));
-      arr.set(arrSize-i, tmp);
-    }
+    Collections.reverse(arr);
+
+//    int arrSize = arr.size();
+//    int bound = arr.size()/2;
+//    for (int i = 0; i < bound; ++i) { // 交换
+//      Integer tmp = arr.get(i);
+//      arr.set(i, arr.get(arrSize-i));
+//      arr.set(arrSize-i, tmp);
+//    }
     return arr;
   }
 }
