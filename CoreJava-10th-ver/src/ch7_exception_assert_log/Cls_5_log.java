@@ -33,7 +33,7 @@ public class Cls_5_log {
   // 日志管理器在VM启动过程中初始化，这在main执行之前完成
 
   private static void test2() {
-    FileHandler handler = new FileHandler();
-    mylger.addHandler(handler);
+//    FileHandler handler = new FileHandler();
+//    mylger.addHandler(handler);
   }
 }
