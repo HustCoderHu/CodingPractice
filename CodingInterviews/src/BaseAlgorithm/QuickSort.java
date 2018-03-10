@@ -65,23 +65,23 @@ public class QuickSort {
     }
   }
 
-  static int partition(int[] arr, int left, int right) {
-    int pivotKey = arr[left];
+  static int partition(int[] ar, int left, int right) {
+    int pivotKey = ar[left];
     System.out.println("pivotKey = " + pivotKey);
 
     while (left < right) {
       // 从前后往中间找
-      while (left < right && arr[right] >= pivotKey)
+      while (left < right && pivotKey <= ar[right])
         right--;
-      arr[left] = arr[right]; // 小的到左边
-      System.out.println(Arrays.toString(arr));
+      ar[left] = ar[right]; // 小的到左边
+      System.out.println(Arrays.toString(ar));
 
-      while (left < right && arr[left] <= pivotKey)
+      while (left < right && ar[left] <= pivotKey)
         left++;
-      arr[right] = arr[left]; // 大的去右边
-      System.out.println(Arrays.toString(arr));
+      ar[right] = ar[left]; // 大的去右边
+      System.out.println(Arrays.toString(ar));
     }
-    arr[left] = pivotKey; // pivot 放中间
+    ar[left] = pivotKey; // pivot 放中间
     return left;
   }
 }
