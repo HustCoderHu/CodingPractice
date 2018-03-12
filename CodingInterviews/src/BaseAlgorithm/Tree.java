@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Tree {
-  private int val;
-  private Tree left;
-  private Tree right;
+  public int val;
+  public Tree left = null;
+  public Tree right = null;
 
   int depth;
 
@@ -37,13 +37,16 @@ public class Tree {
     return nLeft > nRight ? nLeft + 1 : nRight + 1;
   }
 
-  public static Tree flipTree(Tree node) {
+  public static void flipTree(Tree node) {
     if (node == null)
-      return null;
-    Tree flippedLeft = flipTree(node.left);
-    node.left = flipTree(node.right);
-    node.right = flippedLeft;
-    return node;
+      return;
+
+    Tree tmp = node.left;
+    node.left = node.right;
+    node.right = tmp;
+
+    flipTree(node.left);
+    flipTree(node.right);
   }
 
   public static ArrayList<String> displayTree(Tree node) {

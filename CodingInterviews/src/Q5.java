@@ -1,28 +1,36 @@
-import javax.print.attribute.standard.PrinterLocation;
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 public class Q5 {
   // 从尾到头打印链表
   public static void main(String[] args) {
     ArrayList<Integer> arr = new ArrayList<>();
-    arr.add(3);
-    arr.add(3);
-    arr.add(3);
-    arr.add(3);
+    arr.add(67);
+    arr.add(0);
+    arr.add(24);
+    arr.add(58);
     System.out.println(arr.size());
 
-//    ListNode anode = new ListNode(3);
-    ListNode anode = null;
-    System.out.println(printListFromTailToHead(anode));
+    //    ListNode anode = null;
+    ListNode tmp = null;
+
+
+    ListNode anode = new ListNode(67);
+
+    tmp = anode;
+    tmp.append(new ListNode(0));
+    tmp = tmp.next;
+    tmp.append(new ListNode(24));
+    tmp = tmp.next;
+    tmp.append(new ListNode(58));
+    tmp = tmp.next;
+    System.out.println(printListFromTailToHead(anode).toString());
   }
 
   public static ArrayList<Integer> printListFromTailToHead(ListNode listNode) {
     if (listNode == null)
-      return null;
+      return new ArrayList<Integer>();
+//      return null;
 
     ArrayList<Integer> arr = new ArrayList<>();
     while (listNode != null) {
