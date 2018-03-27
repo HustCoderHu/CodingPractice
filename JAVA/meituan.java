@@ -1,6 +1,41 @@
 import java.util.*;
 
-public class Q2 {
+public class meituan {
+
+}
+
+class Q1 {
+  public static void main(String[] args) {
+//    ArrayList<String> q = new ArrayList<>();
+    Set<Integer> words = new HashSet<>();
+
+    Map<String, Integer> staff = new HashMap<>();
+    staff.put("Bob", 1);
+    staff.put("Carl", 2);
+    staff.put("David", 3);
+
+    String name = null;
+    int maxVal = 0;
+
+//    for (Set<Map.Entry> : staff.entrySet())
+
+//    for (Map.Entry<String, Integer> entry : staff.entrySet())
+
+  }
+
+  static void ggg() {
+    Scanner scanner = new Scanner(System.in);
+    String S = scanner.nextLine();
+    String T = scanner.nextLine();
+
+    S = "aaabb";
+    T = "bab";
+
+
+  }
+}
+
+class Q2 {
   public static void main(String[] args) {
     Scanner scanner = new Scanner(System.in);
 //    String str = null;
@@ -43,9 +78,9 @@ public class Q2 {
 
     }
 
-    boolean bb = checkIt(cnt, 111);
-    System.out.println(bb);
-    return;
+//    boolean bb = checkIt(cnt, 111);
+//    System.out.println(bb);
+//    return;
   }
 
   static boolean checkIt(int[] cnt, int val) {
