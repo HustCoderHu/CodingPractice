@@ -3,9 +3,6 @@ package wangyi;
 import java.util.Scanner;
 
 public class wangyi {
-  public static void main(String[] args) {
-
-  }
 }
 // Main
 
@@ -17,8 +14,6 @@ class Q1 {
     int n = 2;
 
     n = in.nextInt();
-
-
   }
 }
 

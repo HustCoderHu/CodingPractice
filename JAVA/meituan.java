@@ -1,7 +1,8 @@
+package meituan;
+
 import java.util.*;
 
 public class meituan {
-
 }
 
 class Q1 {
