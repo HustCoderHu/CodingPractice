@@ -62,4 +62,11 @@ class ListNode {
   public void append(ListNode node) {
     next = node;
   }
+  public void show() {
+    ListNode tmp = this;
+    while (tmp != null) {
+      System.out.printf("%d ", tmp.val);
+      tmp = tmp.next;
+    }
+  }
 }
