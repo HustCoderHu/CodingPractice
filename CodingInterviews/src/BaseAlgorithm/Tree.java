@@ -23,6 +23,10 @@ public class Tree {
     this.right = right;
   }
 
+  public void show() {
+    displayTree(this);
+  }
+
   public int getDepth() {
     int nLeft = _getDepth(left);
     int nRight = _getDepth(right);

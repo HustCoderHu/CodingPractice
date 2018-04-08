@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
+import BaseAlgorithm.ListNode;
+
 public class Q5 {
   // 从尾到头打印链表
   public static void main(String[] args) {
@@ -48,25 +50,5 @@ public class Q5 {
 //      arr.set(arrSize-i, tmp);
 //    }
     return arr;
-  }
-}
-
-class ListNode {
-  int val;
-  ListNode next = null;
-
-  ListNode(int val) {
-    this.val = val;
-  }
-
-  public void append(ListNode node) {
-    next = node;
-  }
-  public void show() {
-    ListNode tmp = this;
-    while (tmp != null) {
-      System.out.printf("%d ", tmp.val);
-      tmp = tmp.next;
-    }
   }
 }

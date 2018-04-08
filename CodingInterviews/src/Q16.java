@@ -1,3 +1,4 @@
+import BaseAlgorithm.ListNode;
 public class Q16 {
   // 反转链表
   public static void main(String[] args) {
