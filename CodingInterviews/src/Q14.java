@@ -1,3 +1,5 @@
+import java.lang.invoke.VarHandle;
+import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
@@ -11,28 +13,30 @@ public class Q14 {
     System.out.println(Arrays.toString(array));
   }
 
-  public static void reOrderArray(int[] array) {
+  static void reOrderArray(int[] array) {
     if (array == null || array.length == 0)
       return;
-
-    int left = 0;
-    int right = array.length-1;
-
 //    Runnable isEven = (int n)-> (n&1) == 0;
     IntPredicate isEven = (int n)-> (n&1) == 0;
-    System.out.println(isEven.test(7));
-    System.out.println(isEven.test(8));
+//    System.out.println(isEven.test(7));
+//    System.out.println(isEven.test(8));
 
-    while (left < right) {
-      while (left < right && isEven.test(array[right]))
-        --right;
+    int[] even = new int[array.length];
+    int k = 0;
 
-      while (left < right && !isEven.test(array[left]))
-        ++left;
+    int i = 0;
+    for (; i < array.length; ++i)
+      if (isEven.test(array[i]))
+        even[k++] = array[i];
 
-      int tmp = array[left];
-      array[left] = array[right];
-      array[right] = tmp;
-    }
+    i = 0;
+    k = 0;
+    for (; i < array.length; ++i)
+      if (!isEven.test(array[i]))
+        array[k++] = array[i];
+
+    i = 0;
+    while (k < array.length)
+      array[k++] = even[i++];
   }
 }

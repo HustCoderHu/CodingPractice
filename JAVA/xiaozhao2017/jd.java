@@ -73,8 +73,88 @@ class jihe_A_plus_B {
   }
 }
 
+class jinzhi_avg {
+  public static void main(String[] args) {
+    Scanner sc = new Scanner(System.in);
+
+    calsum(5);
+    calsum(3);
+    gcd(20, 24);
+
+//    int x = 7;
+//    int sum = calsum(x);
+//    int fenmu = x-2;
+//    int gcd = gcd(sum, fenmu);
+//    System.out.println(sum/gcd + "/" + fenmu/gcd);
+//    return;
+
+    while (sc.hasNext()) {
+      int x = sc.nextInt();
+      int sum = calsum(x);
+      int fenmu = x-2;
+
+      int gcd = gcd(sum, fenmu);
+      System.out.println(sum/gcd + "/" + fenmu/gcd);
+    }
+  }
+
+  static int calsum(int x) {
+    int sum = 0;
+    for (int i = 2; i <= x-1; i++) {
+      int tmp = x;
+      while (tmp != 0) {
+        sum += (tmp % i);
+        tmp /= i;
+      }
+    }
+//    System.out.println("sum = " + sum);
+    return sum;
+  }
+
+  static int gcd(int a, int b) {
+    if (a < b) {
+      int tmp = b;
+      b = a;
+      a = tmp;
+    }
+    while (b != 0) {
+      int r = b;
+      b = a % b;
+      a = r;
+    }
+//    System.out.println("a = " + a);
+    return a;
+  }
+}
+
 class luckyNum {
   public static void main(String[] args) {
+    Scanner sc = new Scanner(System.in);
+    boolean ret = judge(123);
+//    System.out.println("ret = " + ret);
 
+    int n = 123;
+//    n = sc.nextInt();
+
+    int cnt = 0;
+    for (int i = 1; i <= n; i++) {
+      if (judge(i))
+        cnt++;
+    }
+    System.out.println("cnt = " + cnt);
+  }
+  static boolean judge(int x) {
+    int f = 0, g = 0;
+
+    int tmp = x;
+    while (tmp != 0) {
+      f += (tmp % 10);
+      tmp /= 10;
+    }
+    while (x != 0) {
+      x = x & (x-1);
+      g++;
+    }
+    return f==g;
   }
 }

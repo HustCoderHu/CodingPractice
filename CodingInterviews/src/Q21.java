@@ -34,11 +34,13 @@ class MyStack {
       helper.pop();
       return stack.pop();
     }
+    return 0;
   }
 
   public int min() {
     if (!stack.isEmpty()) {
       return helper.peek();
     }
+    return 0;
   }
 }
