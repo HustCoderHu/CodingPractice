@@ -4,7 +4,7 @@ public class Q32 {
   // 1, 10, 11, 12, 13,  6次
   public static void main(String[] args) {
     System.out.println(NumberOf1Between1AndN_Solution(13));
-    System.out.println(NumberOf1Between1AndN_Solution(10000));
+    System.out.println(NumberOf1Between1AndN_Solution(10000)); // 4001
   }
   public static int NumberOf1Between1AndN_Solution(int n) {
     if (n <= 0)

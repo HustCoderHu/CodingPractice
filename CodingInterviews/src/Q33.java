@@ -19,8 +19,9 @@ public class Q33 {
       strNums[i] = String.valueOf(numbers[i]);
     }
 
-    Arrays.sort(strNums);
-    Arrays.sort
+    Comparator<String> comp = new MyComp();
+
+    Arrays.sort(strNums, comp);
 
     StringBuilder str = new StringBuilder();
     for (String s : strNums)
@@ -45,7 +46,9 @@ class MyComp implements Comparator<String> {
     strb.append(o2);
     strb.append(o1);
 
-    stra.toString().equals(strb.toString());
-    return 0;
+//    System.out.println(o1 + " " + o2);
+//    System.out.println(stra.toString() + " " + strb.toString() + ": " +
+//            stra.toString().compareTo(strb.toString()));
+    return stra.toString().compareTo(strb.toString());
   }
 }
