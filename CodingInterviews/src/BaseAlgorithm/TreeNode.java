@@ -3,23 +3,23 @@ package BaseAlgorithm;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Tree {
+public class TreeNode {
   public int val;
-  public Tree left = null;
-  public Tree right = null;
+  public TreeNode left = null;
+  public TreeNode right = null;
 
   int depth;
 
-  public Tree(int x) {
+  public TreeNode(int x) {
     val = x;
 //    depth = getDepth();
   }
 
-  public void setLeft(Tree left) {
+  public void setLeft(TreeNode left) {
     this.left = left;
   }
 
-  public void setRight(Tree right) {
+  public void setRight(TreeNode right) {
     this.right = right;
   }
 
@@ -33,7 +33,7 @@ public class Tree {
     return nLeft > nRight ? nLeft + 1 : nRight + 1;
   }
 
-  static int _getDepth(Tree node) {
+  static int _getDepth(TreeNode node) {
     if (node == null)
       return 0;
     int nLeft = _getDepth(node.left);
@@ -41,11 +41,11 @@ public class Tree {
     return nLeft > nRight ? nLeft + 1 : nRight + 1;
   }
 
-  public static void flipTree(Tree node) {
+  public static void flipTree(TreeNode node) {
     if (node == null)
       return;
 
-    Tree tmp = node.left;
+    TreeNode tmp = node.left;
     node.left = node.right;
     node.right = tmp;
 
@@ -53,7 +53,7 @@ public class Tree {
     flipTree(node.right);
   }
 
-  public static ArrayList<String> displayTree(Tree node) {
+  public static ArrayList<String> displayTree(TreeNode node) {
     final int markVal = 0;
     node.depth = node.getDepth();
     int maxNnode = (int) Math.pow(2, node.depth) - 1;
@@ -62,9 +62,9 @@ public class Tree {
     // 保存节点内容
     ArrayList<String> outStr = new ArrayList<>(maxNnode);
     // 当前处理的层
-    ArrayList<Tree> nodeArrSrc = new ArrayList<>(bottomN);
+    ArrayList<TreeNode> nodeArrSrc = new ArrayList<>(bottomN);
     // 记录下层的节点
-    ArrayList<Tree> nodeArrDst = new ArrayList<>(bottomN);
+    ArrayList<TreeNode> nodeArrDst = new ArrayList<>(bottomN);
 
 //    nodeArrSrc.ensureCapacity(bottomN);
 //    nodeArrDst.ensureCapacity(bottomN);
@@ -77,29 +77,29 @@ public class Tree {
     // 然后用 * 替代 markVal便于人眼观察
     for (int i = 0; i < node.depth; i++) {
       // 第 i 层
-      for (Tree nod : nodeArrSrc) {
+      for (TreeNode nod : nodeArrSrc) {
         // 记录当前层内容
         if (nod.val != markVal) {
           outStr.add(String.valueOf(nod.val));
           // 保存下一层结点
           if (nod.left == null)
-            nodeArrDst.add(new Tree(markVal));
+            nodeArrDst.add(new TreeNode(markVal));
           else
             nodeArrDst.add(nod.left);
 
           if (nod.right == null)
-            nodeArrDst.add(new Tree(markVal));
+            nodeArrDst.add(new TreeNode(markVal));
           else
             nodeArrDst.add(nod.right);
         }
         else {
           outStr.add("*");
-          nodeArrDst.add(new Tree(markVal));
-          nodeArrDst.add(new Tree(markVal));
+          nodeArrDst.add(new TreeNode(markVal));
+          nodeArrDst.add(new TreeNode(markVal));
         }
       }
       // 更新当前层为下层
-      ArrayList<Tree> nodeArrTmp = nodeArrSrc;
+      ArrayList<TreeNode> nodeArrTmp = nodeArrSrc;
       nodeArrSrc = nodeArrDst;
       nodeArrDst = nodeArrTmp;
 //      nodeArrSrc.clear();

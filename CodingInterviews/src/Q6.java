@@ -1,6 +1,6 @@
 
 import java.util.*;
-import BaseAlgorithm.Tree;
+import BaseAlgorithm.TreeNode;
 
 public class Q6 {
   // 重构二叉树
@@ -13,17 +13,17 @@ public class Q6 {
     int[] pre = {1, 2, 4, 7, 3, 5, 6, 8};
     int[] in = {4, 7, 2, 1, 5, 3, 8, 6};
 
-    Tree root = reConstructBinaryTree(pre, in);
+    TreeNode root = reConstructBinaryTree(pre, in);
 //    System.out.println("root = " + root);
 //    System.out.println(root.left);
 //    System.out.println(root.right);
 //    System.out.println(root.getDepth());
 //    displayTree(root, pre.length);
-    Tree.displayTree(root);
+    TreeNode.displayTree(root);
   }
 
-  public static Tree reConstructBinaryTree(int[] pre, int[] in) {
-    Tree root = null;
+  public static TreeNode reConstructBinaryTree(int[] pre, int[] in) {
+    TreeNode root = null;
     try {
       root = constructCore(pre, in, 0, pre.length - 1,
               0, in.length - 1);
@@ -33,7 +33,7 @@ public class Q6 {
     return root;
   }
 
-  public static Tree nonRecurseReConstructBTree(int[] pre, int[] in) {
+  public static TreeNode nonRecurseReConstructBTree(int[] pre, int[] in) {
     if (pre == null || in == null
             || pre.length == 0 || in.length == 0
             || pre.length != in.length)
@@ -46,7 +46,7 @@ public class Q6 {
     for (int i = 0; i < len; i++)
       val2idx.put(in[i], i);
 
-//    Tree root = new Tree(pre[0]);
+//    TreeNode root = new TreeNode(pre[0]);
 //    root.left = null;
 //    root.right = null;
 
@@ -54,12 +54,12 @@ public class Q6 {
     return null;
   }
 
-  public static Tree constructCore(int[] pre, int[] in,
+  public static TreeNode constructCore(int[] pre, int[] in,
                                        int preLeft, int preRight,
                                        int inLeft, int inRight)
           throws Exception {
     int rootVal = pre[preLeft];
-    Tree node = new Tree(rootVal);
+    TreeNode node = new TreeNode(rootVal);
 
     if (preLeft == preRight) {
       if (inLeft == inRight

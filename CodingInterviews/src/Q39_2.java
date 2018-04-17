@@ -1,13 +1,13 @@
-import BaseAlgorithm.Tree;
+import BaseAlgorithm.TreeNode;
 
 public class Q39_2 {
   // 输入一棵二叉树，判断该二叉树是否是平衡二叉树
-  public boolean IsBalanced_Solution(Tree root) {
+  public boolean IsBalanced_Solution(TreeNode root) {
     Depth d = new Depth();
     return isBalanced(root, d);
   }
 
-  static boolean isBalanced(Tree root, Depth d) {
+  static boolean isBalanced(TreeNode root, Depth d) {
     if (root == null) {
       d.depth = 0;
       return true;

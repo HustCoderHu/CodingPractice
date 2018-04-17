@@ -14,18 +14,21 @@ public class Q57 {
     tmp = anode;
     tmp.append(new ListNode(1));
     tmp = tmp.next;
+//    tmp.append(new ListNode(2));
+//    tmp = tmp.next;
     tmp.append(new ListNode(2));
     tmp = tmp.next;
-    tmp.append(new ListNode(3));
-    tmp = tmp.next;
-    tmp.append(new ListNode(3));
-    tmp = tmp.next;
-    tmp.append(new ListNode(4));
-    tmp = tmp.next;
-    tmp.append(new ListNode(4));
-    tmp = tmp.next;
+//    tmp.append(new ListNode(3));
+//    tmp = tmp.next;
+//    tmp.append(new ListNode(3));
+//    tmp = tmp.next;
+//    tmp.append(new ListNode(4));
+//    tmp = tmp.next;
+//    tmp.append(new ListNode(4));
+//    tmp = tmp.next;
     tmp.append(new ListNode(5));
     tmp = tmp.next;
+    tmp.append(new ListNode(6));
 
     anode.show();
     System.out.println();
@@ -50,28 +53,42 @@ public class Q57 {
         cur = cur.next;
       }
     }
-    prev = pHead;
+    cur = prev = pHead;
 
-    cur = prev.next;
+//    cur = prev.next;
     while (cur != null) {
       ListNode next = cur.next;
       if (next == null) {
         prev.next = cur;
         break;
-      } else if (cur.val == next.val)
+      } else if (cur.val == next.val) {
         cur = next.next;
-      else {
+      } else {
         prev.next = cur;
+        prev = cur;
+        cur = next;
       }
-
-        if (cur.val == prev.val)
-          cur = cur.next;
-        else {
-          prev.next = cur;
-          prev = cur;
-          cur = cur.next;
-        }
     }
+
+//    while (cur != null) {
+//      ListNode next = cur.next;
+//      if (next == null) {
+//        prev.next = cur;
+//        break;
+//      } else if (cur.val == next.val)
+//        cur = next.next;
+//      else {
+//        prev.next = cur;
+//      }
+//
+//        if (cur.val == prev.val)
+//          cur = cur.next;
+//        else {
+//          prev.next = cur;
+//          prev = cur;
+//          cur = cur.next;
+//        }
+//    }
     return pHead;
   }
 }

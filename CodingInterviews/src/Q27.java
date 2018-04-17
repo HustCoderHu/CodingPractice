@@ -4,26 +4,26 @@ public class Q27 {
   // 输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。
   // 要求不能创建任何新的结点，只能调整树中结点指针的指向。
   public static void main(String[] args) {
-    Tree root = new Tree(10);
-    root.setLeft(new Tree(6));
-    root.setRight(new Tree(14));
+    TreeNode root = new TreeNode(10);
+    root.setLeft(new TreeNode(6));
+    root.setRight(new TreeNode(14));
 
-    Tree left = root.left;
-    left.setLeft(new Tree(4));
-    left.setRight(new Tree(8));
-    Tree right = root.right;
-    right.setLeft(new Tree(12));
-    right.setRight(new Tree(16));
+    TreeNode left = root.left;
+    left.setLeft(new TreeNode(4));
+//    left.setRight(new TreeNode(8));
+    TreeNode right = root.right;
+    right.setLeft(new TreeNode(12));
+//    right.setRight(new TreeNode(16));
 
     root.show();
 
-    Convert(root);
+//    Convert(root);
   }
-//  static TreeNode Convert(TreeNode pRootOfTree) {
-  static Tree Convert(Tree pRootOfTree) {
-    Tree lastNod = null;
-    cvtNode(pRootOfTree, lastNod);
-    lastNod = pRootOfTree;
+//  static TreeNode Convert(TreeNode pRootOfTreeNode) {
+  static TreeNode Convert(TreeNode pRootOfTreeNode) {
+    TreeNode lastNod = null;
+    cvtNode(pRootOfTreeNode, lastNod);
+    lastNod = pRootOfTreeNode;
     while (lastNod!=null && lastNod.left!=null)
       lastNod = lastNod.left;
 
@@ -33,11 +33,11 @@ public class Q27 {
     return lastNod;
   }
 
-  static Tree cvtNode(Tree nod, Tree lastNod) {
+  static TreeNode cvtNode(TreeNode nod, TreeNode lastNod) {
     if (nod == null) {
       return null;
     }
-    Tree cur = nod;
+    TreeNode cur = nod;
     if (cur.left !=null)
       lastNod = cvtNode(cur.left, lastNod);
     cur.left = lastNod;

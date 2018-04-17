@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
-import BaseAlgorithm.Tree;
+import BaseAlgorithm.TreeNode;
 
 public class Q25 {
   // 输入一颗二叉树和一个整数，打印出二叉树中结点值的和为输入整数的所有路径。
@@ -10,7 +10,7 @@ public class Q25 {
 
   public static void main(String[] args) {
   }
-  public static ArrayList<ArrayList<Integer>> FindPath(Tree root, int target) {
+  public static ArrayList<ArrayList<Integer>> FindPath(TreeNode root, int target) {
     if (pathList == null)
       pathList = new ArrayList<>();
     else
@@ -24,7 +24,7 @@ public class Q25 {
     return pathList;
   }
 
-  static void findPath(Tree root, int target,
+  static void findPath(TreeNode root, int target,
                        ArrayList<Integer> path,
                        int curSum) {
     curSum += root.val;
