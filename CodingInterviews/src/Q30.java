@@ -65,13 +65,14 @@ public class Q30 {
 
   static ArrayList<Integer> nlogk(int[] input, int k) {
 
-    Comparator<Integer> comp = new Comparator<Integer>() {
-      @Override
-      public int compare(Integer o1, Integer o2) {
-        return o1 - o2;
-      }
-    };
-    PriorityQueue<Integer> bigheap = new PriorityQueue<>(k, comp);
+//    Comparator<Integer> comp = new Comparator<>() {
+//      @Override
+//      public int compare(Integer o1, Integer o2) {
+//        return o1 - o2;
+//      }
+//    };
+//    PriorityQueue<Integer> bigheap = new PriorityQueue<>(k, comp);
+    PriorityQueue<Integer> bigheap = new PriorityQueue<>(k, (o1, o2) -> o2-o1);
 
     for (int i = 0; i < input.length; i++) {
       if (bigheap.size() < k) {
