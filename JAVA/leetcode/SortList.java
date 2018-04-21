@@ -65,12 +65,22 @@ public class SortList {
  * Definition for singly-linked list.
  */
 class ListNode {
-  int val;
-  ListNode next;
+  public int val;
+  public ListNode next = null;
 
-  public ListNode(int x) {
-    val = x;
-    next = null;
+  public ListNode(int val) {
+    this.val = val;
+  }
+
+  public void append(ListNode node) {
+    next = node;
+  }
+  public void show() {
+    ListNode tmp = this;
+    while (tmp != null) {
+      System.out.printf("%d ", tmp.val);
+      tmp = tmp.next;
+    }
   }
 }
 
