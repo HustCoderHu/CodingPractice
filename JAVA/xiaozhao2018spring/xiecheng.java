@@ -1,7 +1,5 @@
-package xiecheng;
-import java.sql.SQLOutput;
+package xiaozhao2018spring;
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
 
 public class xiecheng {
 }
@@ -13,7 +11,7 @@ public class xiecheng {
 //        System.out.println(a + b);
 //        }
 //}
-class Q1 { // 71%
+class x1 { // 71%
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
     int n = 4;
@@ -58,7 +56,7 @@ class Q1 { // 71%
   }
 }
 
-class Q2 {
+class x2 {
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
@@ -131,7 +129,7 @@ class Q2 {
 }
 
 
-class Q3 {
+class x3 {
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
     int n = 4;

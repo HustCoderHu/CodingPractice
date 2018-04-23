@@ -1,4 +1,4 @@
-package toutiao;
+package xiaozhao2018spring;
 
 import java.util.HashSet;
 import java.util.Scanner;
@@ -8,7 +8,7 @@ import java.util.TreeSet;
 public class toutiao {
 }
 
-class Q1 {
+class t1 {
   //public class Main {
   public static void main(String[] args) {
     Scanner in = new Scanner(System.in);
@@ -47,7 +47,7 @@ class Q1 {
   }
 }
 
-class Q4 {
+class t4 {
   //public class Main {
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);

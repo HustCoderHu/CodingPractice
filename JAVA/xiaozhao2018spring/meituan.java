@@ -1,11 +1,10 @@
-package meituan;
-
+package xiaozhao2018spring;
 import java.util.*;
 
 public class meituan {
 }
 
-class Q1 {
+class m1 {
   public static void main(String[] args) {
 //    ArrayList<String> q = new ArrayList<>();
     Set<Integer> words = new HashSet<>();
@@ -36,7 +35,7 @@ class Q1 {
   }
 }
 
-class Q2 {
+class m2 {
   public static void main(String[] args) {
     Scanner scanner = new Scanner(System.in);
 //    String str = null;
