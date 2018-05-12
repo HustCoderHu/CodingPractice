@@ -71,6 +71,18 @@ class ListNode {
   public ListNode(int val) {
     this.val = val;
   }
+  public ListNode(int va[]) {
+    if (va == null)
+      return;
+
+    val = va[0];
+    ListNode cur = this;
+    for (int i = 1; i < va.length; i++) {
+      ListNode node = new ListNode(va[i]);
+      cur.next = node;
+      cur = cur.next;
+    }
+  }
 
   public void append(ListNode node) {
     next = node;
