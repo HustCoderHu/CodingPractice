@@ -1,7 +1,6 @@
 package leetcode;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 public class TreeNode {
   public int val;
@@ -161,5 +160,25 @@ public class TreeNode {
       System.out.print(str);
 
     return finalStr;
+  }
+
+  // https://blog.csdn.net/sgbfblog/article/details/7773103
+  public List<Integer> inOrderNonRecursive(TreeNode root) {
+    List<Integer> res = new LinkedList<>();
+    Deque<TreeNode> stack = new LinkedList<>();
+    while (true) {
+      if (root != null) {
+//        stack.push(root);
+        stack.offerLast(root);
+        root = root.left;
+      } else if (!stack.isEmpty()) {
+//        root = stack.pop();
+        root = stack.pollLast();
+        res.add(root.val);
+        root = root.right;
+      } else
+        break;
+    }
+    return res;
   }
 }
