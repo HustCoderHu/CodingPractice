@@ -94,6 +94,18 @@ class ListNode {
       tmp = tmp.next;
     }
   }
+
+  public ListNode reverse() {
+    ListNode h = this;
+    ListNode prev = null;
+    while (h != null) {
+      ListNode nxt = h.next;
+      h.next = prev;
+      prev = h;
+      h = nxt;
+    }
+    return prev;
+  }
 }
 
 //链接：https://www.nowcoder.com/questionTerminal/d75c232a0405427098a8d1627930bea6
