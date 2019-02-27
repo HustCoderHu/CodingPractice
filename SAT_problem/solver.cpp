@@ -5,9 +5,10 @@ Solver::Solver()
 
 }
 
-bool Solver::simplize(Cnf *c, int var, VersionEdit *edit)
+bool Solver::simplize(Cnf *c,unsigned int var, VersionEdit *edit)
 {
-  for (unsigned int pos = 0; pos < c->nClause; ++pos) {
+  unsigned int logicNot = LogicNOT(var);
+  for (unsigned int pos = c->nClause; pos >= 0; --pos) {
     if (c->existClause(pos) == false) // 子句已被简化为空
       continue;
 
@@ -17,7 +18,6 @@ bool Solver::simplize(Cnf *c, int var, VersionEdit *edit)
       edit->del(pos);
       continue;
     }
-    unsigned int logicNot = LogicNOT(pos);
     if (cl->contains(logicNot)) { // 包含 -L
       if (cl->isUnitClause()) // 单子句 -L 不能满足
         return false;
@@ -64,16 +64,16 @@ bool Solver::_solve(Cnf *c)
     }
     var = c->getSimple();
   }
-  int v = selectVar(c);
-  simplize(c, v);
+  var = selectVar(c);
+  simplize(c, var);
   if (_solve(c)) {
-    v.set(v, true);
+    v.set(var, true);
     return true;
   }
   // restore // 还原 CNF
-  simplize(c, LogicNOT(v));
+  simplize(c, LogicNOT(var));
   if (_solve(c)) {
-    v.set(LogicNOT(v), true);
+    v.set(LogicNOT(var), true);
     return true;
   }
   // restore

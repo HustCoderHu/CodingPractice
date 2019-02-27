@@ -17,11 +17,11 @@ public:
   bool get(unsigned int pos);
 
   bool isAllFalse();
+  void resize(int _len);
 
   unsigned int len;
-  unsigned int *intmap_;
-
   unsigned int ints;
+  unsigned int *intmap_;
 
   unsigned int count; // 有效的位数
 };

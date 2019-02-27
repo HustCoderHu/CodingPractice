@@ -7,7 +7,7 @@ BitMap::BitMap(int _len)
 {
   ints = (_len + 31) / 32;
   intmap_ = new int[ints];
-  memset(intmap_, 0, sizeof(intmap_[0]) * len);
+  memset(intmap_, 0, sizeof(intmap_[0]) * ints);
 }
 
 bool BitMap::set(unsigned int pos, bool flag)
@@ -32,26 +32,28 @@ bool BitMap::set(unsigned int pos, bool flag)
 
 void BitMap::reset()
 {
+  memset(intmap_, 0, sizeof(intmap_[0]) * ints);
+  return;
   for (int i = 0; i < ints; ++i)
     intmap_[i] = 0;
 }
 
-int BitMap::get()
-{
-  for (unsigned int i = 0; i < ints; ++i) {
-    if (intmap_[i] != 0) {
-      unsigned ruler = 0x1;
-      unsigned int j = 0;
+//int BitMap::get()
+//{
+//  for (unsigned int i = 0; i < ints; ++i) {
+//    if (intmap_[i] != 0) {
+//      unsigned ruler = 0x1;
+//      unsigned int j = 0;
 
-      while ((intmap_[i] & ruler) == 0) {
-        ++j;
-        ruler <<= 1;
-      }
-      return (i << 5) + j;
-    }
-  }
-  return -1;
-}
+//      while ((intmap_[i] & ruler) == 0) {
+//        ++j;
+//        ruler <<= 1;
+//      }
+//      return (i << 5) + j;
+//    }
+//  }
+//  return -1;
+//}
 
 bool BitMap::get(unsigned int pos)
 {
@@ -76,4 +78,17 @@ bool BitMap::isAllFalse()
       return false;
   }
   return true;
+}
+
+void BitMap::resize(int _len)
+{
+  if (_len <= len)
+    return;
+  int _ints = (_len + 31) / 32;
+  unsigned int *intmap__ = new int[_ints];
+  memset(intmap__, intmap_, sizeof(intmap_[0]) * ints);
+  delete[] intmap_;
+  len = _len;
+  ints = _ints;
+  intmap_ = intmap__;
 }

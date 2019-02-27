@@ -10,7 +10,7 @@ class Solver
 public:
   Solver();
 
-  bool simplize(Cnf *c, int var, VersionEdit *edit);
+  bool simplize(Cnf *c, unsigned int var, VersionEdit *edit);
 
   static void result2file(Cnf *c, const char *fpath);
   static bool solve(Cnf *c);

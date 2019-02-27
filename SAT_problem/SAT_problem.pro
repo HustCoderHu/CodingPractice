@@ -12,7 +12,8 @@ SOURCES += \
     bitmap.cpp \
     versionset.cpp \
     versionedit.cpp \
-    vsetbuilder.cpp
+    vsetbuilder.cpp \
+    cnfedit.cpp
 
 HEADERS += \
     _clause.h \
@@ -24,4 +25,5 @@ HEADERS += \
     bitmap.h \
     versionset.h \
     versionedit.h \
-    vsetbuilder.h
+    vsetbuilder.h \
+    cnfedit.h
