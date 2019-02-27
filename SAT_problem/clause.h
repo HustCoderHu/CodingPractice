@@ -11,7 +11,7 @@ public:
     : len(n)
     , nVar(0)
   {
-    elem = malloc(sizeof(int) * n);
+    elem = new int[n]; //malloc(sizeof(int) * n);
     memcpy(elem, _elem, sizeof(int) * n);
 
     for (int i = 0; i < n; ++i)
@@ -24,7 +24,8 @@ public:
     free(elem);
   }
 
-  bool isUnitClause(int *var) { return nVar == 1; }
+  bool isUnitClause();
+  bool getUnit(int *var);
   bool isUnitClauseFallback()
   {
     bool found = false;
@@ -32,30 +33,40 @@ public:
       if (elem[i] != 0)
         if (!found)
           found = true;
-//        else
+      //        else
     }
   }
   bool contains(int var)
   {
-    return elem[var] == 1;
+    return var < len ? elem[var] == 1 : false;
+
+    if (var < len)
+      return elem[var] == 1;
+    else
+      return false;
   }
 
   void rmVar(int var)
   {
-
+    if (var < len)
+      elem[var] = 0;
   }
   void addVar(int var)
   {
-
+    if (var < len)
+      elem[var] = 1;
   }
   bool suspectVar(int var)
   {
-
+    if (var < len)
+      elem[var] = 0;
   }
 
   int len;
   int *elem;
   int nVar;
 };
+
+int LogicNOT(int var);
 
 #endif // CLAUSE_H

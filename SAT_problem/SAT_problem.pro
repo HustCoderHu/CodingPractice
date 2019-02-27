@@ -7,11 +7,21 @@ SOURCES += \
         main.c \
     clause.cpp \
     cnf.cpp \
-    solver.cpp
+    solver.cpp \
+    version.cpp \
+    bitmap.cpp \
+    versionset.cpp \
+    versionedit.cpp \
+    vsetbuilder.cpp
 
 HEADERS += \
     _clause.h \
     _cnf.h \
     clause.h \
     cnf.h \
-    solver.h
+    solver.h \
+    version.h \
+    bitmap.h \
+    versionset.h \
+    versionedit.h \
+    vsetbuilder.h
