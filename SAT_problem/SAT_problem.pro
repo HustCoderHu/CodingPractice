@@ -8,12 +8,9 @@ SOURCES += \
     clause.cpp \
     cnf.cpp \
     solver.cpp \
-    version.cpp \
     bitmap.cpp \
-    versionset.cpp \
-    versionedit.cpp \
-    vsetbuilder.cpp \
-    cnfedit.cpp
+    cnfedit.cpp \
+    test.cpp
 
 HEADERS += \
     _clause.h \
@@ -21,9 +18,5 @@ HEADERS += \
     clause.h \
     cnf.h \
     solver.h \
-    version.h \
     bitmap.h \
-    versionset.h \
-    versionedit.h \
-    vsetbuilder.h \
     cnfedit.h

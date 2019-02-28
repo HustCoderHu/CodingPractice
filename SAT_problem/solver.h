@@ -3,24 +3,25 @@
 #include "cnf.h"
 #include "clause.h"
 
-#include "versionedit.h"
+#include "cnfedit.h"
 
 class Solver
 {
 public:
   Solver();
+  ~Solver() {}
 
-  bool simplize(Cnf *c, unsigned int var, VersionEdit *edit);
+  bool simplize(Cnf *c, unsigned int var, CnfEdit *edit);
 
-  static void result2file(Cnf *c, const char *fpath);
-  static bool solve(Cnf *c);
-  static bool _solve(Cnf *c);
-  static int selectVar(Cnf *c);
+  void result2file(Cnf *c, const char *fpath);
+  bool solve(Cnf *c);
+  int _solve(Cnf *c);
+  int selectVar(Cnf *c);
 
   unsigned int *varCnt;
 
-  bool s;
-  BitMap v; // 解 变元值
+  int s;
+  BitMap *v; // 解 变元值
   unsigned long t;
 };
 

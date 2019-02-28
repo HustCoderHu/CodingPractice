@@ -1,22 +1,40 @@
 #include "cnfedit.h"
+#include <string.h>
 
-CnfEdit::CnfEdit(unsigned int nClause, unsigned int _nVar)
-  : deletedClause(nClause)
-  , nVar(_nVar)
+CnfEdit::CnfEdit(uint32_t nClause, uint32_t _nVar)
 {
-  varVec = new BitMap*[nVar];
-  for (int i = 0; i < nVar; ++i)
-    varVec[i] = nullptr;
+  deletedClause = nullptr;
+  nVar = _nVar;
+  varVec = nullptr;
+}
+
+void CnfEdit::reset()
+{
+  if (deletedClause)
+    deletedClause->reset();
+
+  if (nullptr == varVec)
+    return;
+  for ()
 }
 
 void CnfEdit::delClause(unsigned int pos)
 {
-  deletedClause.set(pos, true);
+  if (nullptr == deletedClause)
+    deletedClause = new BitMap(pos);
+  deletedClause->set(pos, true);
 }
 
-void CnfEdit::delClauseVar(unsigned int pos, unsigned int var)
+void CnfEdit::delClauseVar(unsigned int var, unsigned int pos)
 {
-  if (varVec[var] == nullptr) {
+  if (nullptr == varVec) {
+    varVec = new BitMap*[nVar];
+    memset(varVec, 0, sizeof(BitMap*) * var);
+//    for (int i = 0; i < nVar; ++i)
+//      varVec[i] = nullptr;
+  }
+
+  if (nullptr == varVec[var]) {
     varVec[var] = new BitMap(pos+1);
   }
   if (pos >= varVec[var]->len)

@@ -1,29 +1,32 @@
 #ifndef BITMAP_H
 #define BITMAP_H
+#include <stdint.h>
 
 class BitMap
 {
 public:
-  BitMap(int _len);
+  BitMap(uint32_t _len);
   ~BitMap()
   {
     delete[] intmap_;
   }
 
-  bool set(unsigned int pos, bool flag);
+  bool set(uint32_t pos, bool flag);
   void reset();
 
 //  int get();
-  bool get(unsigned int pos);
+  bool get(uint32_t pos);
 
   bool isAllFalse();
-  void resize(int _len);
+  void resize(uint32_t _len);
 
-  unsigned int len;
-  unsigned int ints;
-  unsigned int *intmap_;
+  void OR(BitMap *other);
 
-  unsigned int count; // 有效的位数
+  uint32_t len;
+  uint32_t ints;
+  uint32_t *intmap_;
+
+//  unsigned int count; // 有效的位数
 };
 
 #endif // BITMAP_H

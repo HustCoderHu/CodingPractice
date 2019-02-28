@@ -4,19 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stdint.h>
+
 class Clause
 {
 public:
-  Clause(int n, int *_elem)
+  Clause(int _minV, int _maxV)
     : len(n)
     , nVar(0)
   {
-    elem = new int[n]; //malloc(sizeof(int) * n);
-    memcpy(elem, _elem, sizeof(int) * n);
+    minV = _minV;
+    len = _maxV - _minV + 1;
+    elem = new bool[len]; //malloc(sizeof(int) * n);
 
-    for (int i = 0; i < n; ++i)
-      if (_elem[i] != 0)
-        ++nVar;
+    for (uint32_t i = 0; i < len; ++i)
+      elem[i] != false;
   }
 
   ~Clause()
@@ -25,48 +27,58 @@ public:
   }
 
   bool isUnitClause();
-  bool getUnit(int *var);
+  bool getUnit(uint32_t *var);
   bool isUnitClauseFallback()
   {
     bool found = false;
-    for(int i = 0; i < len; ++i) {
+    for(uint32_t i = 0; i < len; ++i) {
       if (elem[i] != 0)
         if (!found)
           found = true;
       //        else
     }
+    return false;
   }
   bool contains(int var)
   {
-    return var < len ? elem[var] == 1 : false;
+    return (var < minV || var >= minV + len) ?
+          false : elem[var-minV];
 
-    if (var < len)
-      return elem[var] == 1;
-    else
+    if (var < minV || var >= minV + len)
       return false;
+    return elem[var-minV];
   }
 
   void rmVar(int var)
   {
-    if (var < len)
-      elem[var] = 0;
+    if (var < minV || var >= minV + len)
+      return;
+    if (true == elem[var-minV])
+      --nVar;
+    elem[var-minV] = false;
   }
+
   void addVar(int var)
   {
-    if (var < len)
-      elem[var] = 1;
+    if (var < minV || var >= minV + len)
+      return;
+    if (elem[var-minV] == false)
+      ++nVar;
+    elem[var-minV] = true;
   }
   bool suspectVar(int var)
   {
     if (var < len)
-      elem[var] = 0;
+      elem[var] = false;
+    return true;
   }
 
-  int len;
-  int *elem;
-  int nVar;
+  int minV;
+  uint32_t len;
+  bool *elem;
+  uint32_t nVar;
 };
 
-int LogicNOT(int var);
+int LogicNOT(uint32_t var);
 
 #endif // CLAUSE_H
