@@ -36,7 +36,7 @@ public:
   }
 
   bool isUnitClause();
-  bool getUnit(uint32_t *var);
+  bool getUnit(int *var);
   bool isUnitClauseFallback();
   bool contains(int var);
 
@@ -55,11 +55,12 @@ public:
   // 缓存变量，全部缓存之后再处理
   void bufferVar(int var);
   void finishBuffer();
+  // 程序退出时释放缓存
   static void releaseBuf() { delete[] varBuf; }
 
   // 经过转换后，子句内最小变量
-  uint32_t minV;
-  uint32_t maxV;
+  uint32_t minTransformed;
+  uint32_t maxTransformed;
   // 变量的最小序号
   uint32_t base;
 

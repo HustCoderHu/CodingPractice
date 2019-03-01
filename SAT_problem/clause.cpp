@@ -15,12 +15,13 @@ bool Clause::isUnitClause()
   return false;
 }
 
-bool Clause::getUnit(uint32_t *var)
+bool Clause::getUnit(int *var)
 {
   if (nVarInClause != 1)
     return false;
   for (uint32_t i = 0; i < len; ++i) {
     if (elem[i]) {
+      uint32_t transformed = base + i;
       *var = i;
       return true;
     }
@@ -42,30 +43,33 @@ bool Clause::isUnitClauseFallback()
 
 bool Clause::contains(int var)
 {
-  return (var < minV || var >= minV + len) ?
-        false : elem[var-minV];
-
-  if (var < minV || var >= minV + len)
-    return false;
-  return elem[var-minV];
+  uint32_t transformed = toBufferFormat(var);
+  return (transformed < base || transformed >= base + len) ?
+        false : elem[transformed-base];
 }
 
 void Clause::rmVar(int var)
 {
-  if (var < minV || var >= minV + len)
+  uint32_t transformed = toBufferFormat(var);
+  if (transformed < base || transformed >= base + len)
     return;
-  if (true == elem[var-minV])
+  if (true == elem[transformed-base]) {
     --nVarInClause;
-  elem[var-minV] = false;
+    elem[transformed-base] = false;
+  }
 }
 
 void Clause::addVar(int var)
 {
-  if (var < minV || var >= minV + len)
+  uint32_t transformed = toBufferFormat(var);
+  if (transformed < base || transformed >= base + len)
     return;
-  if (elem[var-minV] == false)
+  if (elem[var-minTransformed] == false)
     ++nVarInClause;
-  elem[var-minV] = true;
+  if (true == elem[transformed-base]) {
+    --nVarInClause;
+    elem[transformed-base] = false;
+  }
 }
 
 bool Clause::suspectVar(int var)
@@ -127,14 +131,14 @@ void Clause::bufferVar(int var)
   }
   uint32_t transformed = toBufferFormat(var);
   varBuf[buffered++] = transformed;
-  minV = transformed < minV ? transformed : minV;
-  maxV = transformed > maxV ? transformed : maxV;
+  minTransformed = transformed < minTransformed ? transformed : minTransformed;
+  maxTransformed = transformed > maxTransformed ? transformed : maxTransformed;
 }
 
 void Clause::finishBuffer()
 {
-  base = minV >> 1;
-  len = ((maxV>>1) - base) + 1; // 变量个数，不包括取反
+  base = minTransformed >> 1;
+  len = ((maxTransformed>>1) - base) + 1; // 变量个数，不包括取反
   len <<= 1; // 记录反变量的空间
   elem = new bool[len]; //malloc(sizeof(int) * n);
   memset(elem, 0, sizeof(elem[0]) * len);
@@ -152,7 +156,7 @@ Clause::Clause(int _minV, int _maxV)
 {
   //    len = ;
   nVarInClause = 0;
-  minV = _minV;
+  minTransformed = _minV;
   len = _maxV - _minV + 1;
   elem = new bool[len]; //malloc(sizeof(int) * n);
 
@@ -162,8 +166,8 @@ Clause::Clause(int _minV, int _maxV)
 
 Clause::Clause(uint32_t _bufCapacity)
 {
-  minV = -1; // uint32_t max
-  maxV = 0;
+  minTransformed = -1; // uint32_t max
+  maxTransformed = 0;
 
   if (nullptr == varBuf) {
     bufCapacity = _bufCapacity;

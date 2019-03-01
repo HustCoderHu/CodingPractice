@@ -34,8 +34,6 @@ void BitMap::reset()
 {
   memset(intmap_, 0, sizeof(intmap_[0]) * ints);
   return;
-  for (uint32_t i = 0; i < ints; ++i)
-    intmap_[i] = 0;
 }
 
 //int BitMap::get()

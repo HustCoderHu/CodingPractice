@@ -17,6 +17,17 @@ Cnf::Cnf()
   bmap = nullptr;
 }
 
+Cnf::~Cnf()
+{
+  delete bmap;
+  for (uint32_t i = 0; i < nClause; ++i) {
+    if (clVec[i]) {
+      delete clVec;
+    }
+  }
+  delete[] clVec;
+}
+
 void Cnf::parseFile(const char *fpath)
 {
   FILE *fp = fopen(fpath, "r");
@@ -41,6 +52,7 @@ void Cnf::parseFile(const char *fpath)
   for (nCur = 0; nCur < nClause; ++nCur) {
     fgets(buf, LINE_MAX_LEN, fp);
     clVec[nCur] = parseLine(buf);
+    bmap->set(nCur, true;)
   }
 }
 
@@ -52,7 +64,6 @@ Clause *Cnf::parseLine(char buf[])
 
 //  uint32_t nVar = countNvar(buf);
   Clause *cl = new Clause(10);
-
 
   char* token = strtok(buf, " ");
   while ( token != NULL ) {
@@ -78,23 +89,42 @@ uint32_t Cnf::countNvar(char buf[])
   return nVar;
 }
 
-void Cnf::show()
+int Cnf::getSimple()
 {
+  int simple;
+  for (int i = 0; i < nVar; ++i) {
+    if (clVec[i] != nullptr) {
+      if (clVec[i]->getUnit(&simple))
+        return simple;
+    }
+  }
+  return -1;
 }
 
-bool Cnf::existClause(unsigned int pos)
+void Cnf::show()
+{
+  char display[80];
+  for (uint32_t i = 0; i < nClause; ++i) {
+    if (existClause(i)) {
+      clVec[i]->toString(display);
+      printf("%s\n", display);
+    }
+  }
+}
+
+bool Cnf::existClause(uint32_t pos)
 {
   return bmap->get(pos);
 }
 
-void Cnf::rmClause(unsigned int pos)
+void Cnf::markClauseRemoved(uint32_t pos)
 {
   bmap->set(pos, false);
 }
 
 void Cnf::restore(CnfEdit *edit)
 {
-//  BitMap *deletedClause = edit->deletedClause;
+  //  BitMap *deletedClause = edit->deletedClause;
   bmap->OR(edit->deletedClause); // 还原子句的存在情况
 
   BitMap **varVec = edit->varVec;

@@ -11,7 +11,8 @@ SOURCES += \
     bitmap.cpp \
     cnfedit.cpp \
     test.cpp \
-    test_clause.cpp
+    test_clause.cpp \
+    test_cnf.cpp
 
 HEADERS += \
     _clause.h \

@@ -11,7 +11,7 @@ public:
   Solver();
   ~Solver() {}
 
-  bool simplize(Cnf *c, unsigned int var, CnfEdit *edit);
+  bool simplize(Cnf *c, int var, CnfEdit *edit);
 
   void result2file(Cnf *c, const char *fpath);
   bool solve(Cnf *c);

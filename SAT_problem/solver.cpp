@@ -5,7 +5,6 @@
 
 Solver::Solver()
 {
-
 }
 
 /**
@@ -16,7 +15,7 @@ Solver::Solver()
  * @param edit
  * @return
  */
-bool Solver::simplize(Cnf *c, unsigned int var, CnfEdit *edit)
+bool Solver::simplize(Cnf *c, int var, CnfEdit *edit)
 {
   unsigned int logicNot = LogicNOT(var);
   for (int pos = c->nClause; pos >= 0; --pos) {
@@ -25,11 +24,11 @@ bool Solver::simplize(Cnf *c, unsigned int var, CnfEdit *edit)
 
     Clause *cl = c->clVec[pos];
     if (cl->contains(var)) { // 子句包含变量 L ，标记满足
-      c->rmClause(pos);
+      c->markClauseRemoved(pos);
       edit->delClause(pos);
       continue;
     }
-    if (cl->contains(logicNot)) { // 包含 -L
+    if (cl->contains(-var)) { // 包含 -L
       if (cl->isUnitClause()) // 单子句 -L 不能满足
         return false;
       cl->rmVar(logicNot);
@@ -60,6 +59,7 @@ void Solver::result2file(Cnf *c, const char *fpath)
 
 bool Solver::solve(Cnf *c)
 {
+  v = new BitMap(c->nVar);
   v->reset();
   s = _solve(c);
 }
@@ -90,9 +90,9 @@ int Solver::_solve(Cnf *c)
   // 还原 CNF，验证另外一条分支
   c->restore(edit_branch);
   edit_branch->reset();
-  simplize(c, LogicNOT(var), edit_branch);
+  simplize(c, -var, edit_branch);
   if (_solve(c) == 0) {
-    v->set(LogicNOT(var), true);
+    v->set(var, false);
     delete edit;
     delete edit_branch;
     return 1;
@@ -101,6 +101,7 @@ int Solver::_solve(Cnf *c)
   c->restore(edit_branch);
   c->restore(edit);
   delete edit;
+  delete edit_branch;
   return 0;
 }
 
