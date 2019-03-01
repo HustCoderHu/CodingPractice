@@ -12,10 +12,12 @@ void CnfEdit::reset()
 {
   if (deletedClause)
     deletedClause->reset();
-
   if (nullptr == varVec)
     return;
-  for ()
+  for (uint32_t v = 0; v < nVar; ++v) {
+    if (varVec[v])
+      varVec[v]->reset();
+  }
 }
 
 void CnfEdit::delClause(unsigned int pos)

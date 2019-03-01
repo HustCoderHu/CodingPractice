@@ -32,6 +32,8 @@ public:
     return bmap->isAllFalse();
   }
 
+  void show();
+
   bool existClause(unsigned int pos);
   void rmClause(unsigned int pos);
   //  void apply(CnfEdit *edit);

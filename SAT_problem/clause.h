@@ -3,80 +3,73 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <stdint.h>
+#include <math.h>
+
+#include <stdbool.h>
+
+/**
+ * @brief The Clause class
+ * 至少两个单元表示 L -L
+ * 0  1  2  3  4  5 ...
+ * L -L  M -M  N -N ...
+ *
+ * 数字映射规律
+ * var ->
+ *  >0 ? (var - 1) * 2
+ *  <0 ? (-var) * 2 - 1
+ * 即 相邻偶数和奇数成 L, -L
+ *
+ * transformed = base + 数组下标
+ */
 
 class Clause
 {
 public:
-  Clause(int _minV, int _maxV)
-    : len(n)
-    , nVar(0)
-  {
-    minV = _minV;
-    len = _maxV - _minV + 1;
-    elem = new bool[len]; //malloc(sizeof(int) * n);
-
-    for (uint32_t i = 0; i < len; ++i)
-      elem[i] != false;
-  }
+  Clause(int _minV, int _maxV);
+  Clause(uint32_t _bufCapacity);
 
   ~Clause()
   {
-    free(elem);
+    delete[] elem;
+//    free(elem);
   }
 
   bool isUnitClause();
   bool getUnit(uint32_t *var);
-  bool isUnitClauseFallback()
-  {
-    bool found = false;
-    for(uint32_t i = 0; i < len; ++i) {
-      if (elem[i] != 0)
-        if (!found)
-          found = true;
-      //        else
-    }
-    return false;
-  }
-  bool contains(int var)
-  {
-    return (var < minV || var >= minV + len) ?
-          false : elem[var-minV];
+  bool isUnitClauseFallback();
+  bool contains(int var);
 
-    if (var < minV || var >= minV + len)
-      return false;
-    return elem[var-minV];
-  }
+  // 标记变量被去除
+  void rmVar(int var);
 
-  void rmVar(int var)
-  {
-    if (var < minV || var >= minV + len)
-      return;
-    if (true == elem[var-minV])
-      --nVar;
-    elem[var-minV] = false;
-  }
+  // 标记变量存在
+  void addVar(int var);
 
-  void addVar(int var)
-  {
-    if (var < minV || var >= minV + len)
-      return;
-    if (elem[var-minV] == false)
-      ++nVar;
-    elem[var-minV] = true;
-  }
-  bool suspectVar(int var)
-  {
-    if (var < len)
-      elem[var] = false;
-    return true;
-  }
+  bool suspectVar(int var);
 
-  int minV;
+  void toString(char strbuf[]);
+
+  static uint32_t toBufferFormat(int var);
+  static int FromBufferFormat(uint32_t transformed);
+  // 缓存变量，全部缓存之后再处理
+  void bufferVar(int var);
+  void finishBuffer();
+  static void releaseBuf() { delete[] varBuf; }
+
+  // 经过转换后，子句内最小变量
+  uint32_t minV;
+  uint32_t maxV;
+  // 变量的最小序号
+  uint32_t base;
+
   uint32_t len;
   bool *elem;
-  uint32_t nVar;
+  uint32_t nVarInClause;
+
+  static int *varBuf;
+  static uint32_t bufCapacity;
+  static uint32_t buffered;
 };
 
 int LogicNOT(uint32_t var);

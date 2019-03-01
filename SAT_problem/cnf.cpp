@@ -51,13 +51,19 @@ Clause *Cnf::parseLine(char buf[])
   int max_var;
 
 //  uint32_t nVar = countNvar(buf);
+  Clause *cl = new Clause(10);
+
 
   char* token = strtok(buf, " ");
   while ( token != NULL ) {
-    token = strtok(NULL, " ");
     var = atoi(token);
+    if (0 == var)
+      break;
+    cl->bufferVar(var);
+    token = strtok(NULL, " ");
   }
-  return nullptr;
+  cl->finishBuffer();
+  return cl;
 }
 
 uint32_t Cnf::countNvar(char buf[])
@@ -70,6 +76,10 @@ uint32_t Cnf::countNvar(char buf[])
     pre = buf[i];
   }
   return nVar;
+}
+
+void Cnf::show()
+{
 }
 
 bool Cnf::existClause(unsigned int pos)

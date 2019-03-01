@@ -10,7 +10,8 @@ SOURCES += \
     solver.cpp \
     bitmap.cpp \
     cnfedit.cpp \
-    test.cpp
+    test.cpp \
+    test_clause.cpp
 
 HEADERS += \
     _clause.h \

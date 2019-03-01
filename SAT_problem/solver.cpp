@@ -67,7 +67,6 @@ bool Solver::solve(Cnf *c)
 int Solver::_solve(Cnf *c)
 {
   CnfEdit *edit = new CnfEdit(c->nClause, c->nVar);
-
   int var = c->getSimple();
   while (var != -1) {
     if (simplize(c, var, edit)) {
@@ -85,18 +84,21 @@ int Solver::_solve(Cnf *c)
   if (_solve(c) == 0) {
     v->set(var, true);
     delete edit;
+    delete edit_branch;
     return 1;
   }
   // 还原 CNF，验证另外一条分支
   c->restore(edit_branch);
-
+  edit_branch->reset();
   simplize(c, LogicNOT(var), edit_branch);
   if (_solve(c) == 0) {
     v->set(LogicNOT(var), true);
     delete edit;
+    delete edit_branch;
     return 1;
   }
   // 无解
+  c->restore(edit_branch);
   c->restore(edit);
   delete edit;
   return 0;
