@@ -1,7 +1,8 @@
 #include "solver.h"
-
-// 比如 A=2n, 则-A=2n+1
-#define LogicNOT(var) (var ^ 0x1)
+#include <time.h>
+#include <iostream>
+using std::cout;
+using std::endl;
 
 Solver::Solver()
 {
@@ -13,99 +14,180 @@ Solver::Solver()
  * @param c
  * @param var
  * @param edit
- * @return
+ * @return bool, false if 存在单子句 -var
  */
-bool Solver::simplize(Cnf *c, int var, CnfEdit *edit)
+bool Solver::simplize(Cnf *cnf, int var, CnfEdit *edit)
 {
-  unsigned int logicNot = LogicNOT(var);
-  for (int pos = c->nClause; pos >= 0; --pos) {
-    if (c->existClause(pos) == false) // 子句已被简化为空
+  for (int pos = cnf->nClause - 1; pos >= 0; --pos) {
+    if (cnf->existClause(pos) == false) // 子句已被简化为空
       continue;
 
-    Clause *cl = c->clVec[pos];
+    Clause *cl = cnf->clVec[pos];
     if (cl->contains(var)) { // 子句包含变量 L ，标记满足
-      c->markClauseRemoved(pos);
+      cnf->markClauseExist(pos, false);
       edit->delClause(pos);
       continue;
     }
     if (cl->contains(-var)) { // 包含 -L
       if (cl->isUnitClause()) // 单子句 -L 不能满足
         return false;
-      cl->rmVar(logicNot);
-      edit->delClauseVar(logicNot, pos);
+      cl->rmVar(-var);
+      edit->delClauseVar(-var, pos);
     }
   }
   return true;
 }
 
-void Solver::result2file(Cnf *c, const char *fpath)
+void Solver::showResult()
+{
+  printf("s %d\n", s);
+  // v
+  printf("v");
+  for (uint32_t i = 0; i < resoBmap->len; ++i) {
+    if (resoBmap->get(i))
+      printf(" %d", i+1);
+    else
+      printf(" -%d", i+1);
+  }
+  printf("\n");
+  printf("t %lu\n", t);
+}
+
+void Solver::result2file(const char *fpath)
 {
   FILE *fp = fopen(fpath, "w+");
   // s
   fprintf(fp, "s %d\n", s);
   // v
   fprintf(fp, "v");
-  for (unsigned int i = 0; i < v->len; ++i) {
-    if (v->get(i))
-      fprintf(fp, " %d", i);
+  for (uint32_t i = 0; i < resoBmap->len; ++i) {
+    if (resoBmap->get(i))
+      fprintf(fp, " %d", i+1);
     else
-      fprintf(fp, " -%d", i);
+      fprintf(fp, " -%d", i+1);
   }
-  fprintf(fp, "t %l", t);
+  fprintf(fp, "\n");
+  fprintf(fp, "t %lu", t);
   // t
 
   fclose(fp);
 }
 
-bool Solver::solve(Cnf *c)
+bool Solver::solve(Cnf *cnf)
 {
-  v = new BitMap(c->nVar);
-  v->reset();
-  s = _solve(c);
+  resoBmap = new BitMap(cnf->nVar);
+  resoBmap->reset();
+
+  clock_t start, finish;
+  start = clock();
+  s = _solve(cnf, 0);
+  finish = clock();
+  t = (double)(finish - start) * 1000 / CLOCKS_PER_SEC;
+  // TODO return
 }
 
-int Solver::_solve(Cnf *c)
+int Solver::_solve(Cnf *cnf, int var)
 {
-  CnfEdit *edit = new CnfEdit(c->nClause, c->nVar);
-  int var = c->getSimple();
-  while (var != -1) {
-    if (simplize(c, var, edit)) {
-      if (c->isEmpty()) // 全部被简化
-        return true;
-    } else { // 单子句 -L 不能满足
-      return false;
+  int ret = 0;
+  CnfEdit *edit = new CnfEdit(cnf->nClause, cnf->nVar);
+  if (var != 0) {
+    simplize(cnf, var, edit);
+    resoBmap->set(abs(var)-1, var>0);
+//    cnf->show();
+//    cnf->bmap->show();
+//    cout << endl;
+    if (cnf->isEmpty()) {// 全部被简化
+      ret = 1;
+      goto end;
     }
-    var = c->getSimple();
   }
+  while (cnf->getSimple(&var)) {
+    if (simplize(cnf, var, edit)) {
+      resoBmap->set(abs(var)-1, var>0);
+      if (cnf->isEmpty()) {// 全部被简化
+        ret = 1;
+        goto end;
+      }
+    } else { // 单子句 -L 不能满足
+      ret = 0;
+      goto end;
+    }
+  }
+//  cnf->show();
 
-  CnfEdit *edit_branch = new CnfEdit(c->nClause, c->nVar);
-  var = selectVar(c);
-  simplize(c, var, edit_branch);
-  if (_solve(c) == 0) {
-    v->set(var, true);
-    delete edit;
-    delete edit_branch;
-    return 1;
+  var = selectVar(cnf);
+  cout << "select: " << var << endl;
+  //  simplize(cnf, var, edit_branch);
+  ret = _solve(cnf, var);
+  if (1 == ret || -1 == ret) {
+    ret = 1;
+    goto end;
   }
   // 还原 CNF，验证另外一条分支
-  c->restore(edit_branch);
-  edit_branch->reset();
-  simplize(c, -var, edit_branch);
-  if (_solve(c) == 0) {
-    v->set(var, false);
-    delete edit;
-    delete edit_branch;
-    return 1;
+  ret = _solve(cnf, var);
+  if (1 == ret || -1 == ret) {
+    ret = 1;
   }
   // 无解
-  c->restore(edit_branch);
-  c->restore(edit);
+end:
+  cnf->restore(edit);
   delete edit;
-  delete edit_branch;
-  return 0;
+  return ret;
 }
 
-int Solver::selectVar(Cnf *c)
+int Solver::selectVar(Cnf *cnf)
+{
+  // TODO
+//  Clause *cl = cnf->getShortestClause();
+  Clause *cl = cnf->getRandomClause();
+//  char strbuf[20];
+//  cl->toString(strbuf);
+//  printf("%s \n", strbuf);
+  return cl->getVar(0);
+}
+
+bool Solver::verify(Cnf *cnf)
+{
+  char strbuf[80];
+  for (uint32_t i = 0; i < cnf->nClause; ++i) {
+    Clause *cl = cnf->clVec[i];
+    cl->toString(strbuf);
+    if (!cl->verify(resoBmap)) {
+//      cl->toString(strbuf);
+      printf("idx: %d\n", i);
+      printf("%s\n", strbuf);
+    }
+  }
+  return true;
+}
+
+Reso::Reso(uint32_t nVar)
+{
+  v = new BitMap(nVar);
+  len = nVar;
+//  varBuffer = new int[nVar];
+  nCur = 0;
+}
+
+void Reso::addVar(int var, bool flag)
+{
+  if (var > 0) {
+//    varBuffer[nCur++] = var;
+    v->set(var-1, flag);
+  } else {
+//    varBuffer[nCur++] = -var;
+    v->set(-var-1, !flag);
+  }
+}
+
+bool Reso::getReso(uint32_t var)
+{
+  return v->get(var-1);
+}
+
+void Reso::rollback(uint32_t n)
 {
 
 }
+
+

@@ -26,6 +26,7 @@ Cnf::~Cnf()
     }
   }
   delete[] clVec;
+  Clause::releaseBuf();
 }
 
 void Cnf::parseFile(const char *fpath)
@@ -52,17 +53,16 @@ void Cnf::parseFile(const char *fpath)
   for (nCur = 0; nCur < nClause; ++nCur) {
     fgets(buf, LINE_MAX_LEN, fp);
     clVec[nCur] = parseLine(buf);
-    bmap->set(nCur, true;)
+    markClauseExist(nCur, true);
   }
+
+  fclose(fp);
 }
 
-Clause *Cnf::parseLine(char buf[])
+Clause *Cnf::parseLine(char *buf)
 {
-  char c;
   int var;
-  int max_var;
-
-//  uint32_t nVar = countNvar(buf);
+  //  uint32_t nVar = countNvar(buf);
   Clause *cl = new Clause(10);
 
   char* token = strtok(buf, " ");
@@ -89,16 +89,42 @@ uint32_t Cnf::countNvar(char buf[])
   return nVar;
 }
 
-int Cnf::getSimple()
+bool Cnf::getSimple(int *var)
 {
-  int simple;
-  for (int i = 0; i < nVar; ++i) {
-    if (clVec[i] != nullptr) {
-      if (clVec[i]->getUnit(&simple))
-        return simple;
+  for (uint32_t i = 0; i < nClause; ++i) {
+    if (existClause(i)) {
+      if (clVec[i]->getUnit(var)) {
+        return true;
+      }
     }
   }
-  return -1;
+  return false;
+}
+
+Clause *Cnf::getShortestClause()
+{
+  uint32_t minLen = -1;
+  Clause *shortest = nullptr;
+  for (uint32_t i = 0; i < nClause; ++i) {
+    if (existClause(i) && clVec[i]->nVarInClause < minLen) {
+      minLen = clVec[i]->nVarInClause;
+      shortest = clVec[i];
+    }
+  }
+  return shortest;
+}
+
+Clause *Cnf::getRandomClause()
+{
+  int idx = rand() % (nClause>>3);
+  uint32_t j = 0;
+  for (uint32_t i = 0; i < idx; ++j) {
+    j = j >= nClause ? j-nClause : j;
+    if (existClause(j)) {
+      ++i;
+    }
+  }
+  return clVec[j];
 }
 
 void Cnf::show()
@@ -117,29 +143,30 @@ bool Cnf::existClause(uint32_t pos)
   return bmap->get(pos);
 }
 
-void Cnf::markClauseRemoved(uint32_t pos)
+void Cnf::markClauseExist(uint32_t pos, bool exist)
 {
-  bmap->set(pos, false);
+  bmap->set(pos, exist);
 }
 
 void Cnf::restore(CnfEdit *edit)
 {
   //  BitMap *deletedClause = edit->deletedClause;
-  bmap->OR(edit->deletedClause); // 还原子句的存在情况
+  if (edit->deletedClause != nullptr)
+    bmap->OR(edit->deletedClause); // 还原子句的存在情况
 
   BitMap **varVec = edit->varVec;
   if (nullptr == varVec)
     return;
-  for (uint32_t var = 0; var < nVar; ++var) {
-    if (nullptr == varVec[var])
+  for (uint32_t transformed = 0; transformed < edit->nVarPlusNOT; ++transformed) {
+    if (nullptr == varVec[transformed])
       continue;
-    BitMap *posMap = varVec[var];
+    BitMap *posMap = varVec[transformed];
+    uint32_t var = Clause::FromBufferFormat(transformed);
     for (uint32_t p = 0; p < posMap->len; ++p) {
       if (posMap->get(p)) {
         clVec[p]->addVar(var);
       }
     }
-    posMap->reset();
   }
 }
 

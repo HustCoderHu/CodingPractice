@@ -5,8 +5,11 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
+#include "bitmap.h"
 
-#include <stdbool.h>
+//#include <stdbool.h> // bool in C
+
+class ClauseEdit;
 
 /**
  * @brief The Clause class
@@ -26,8 +29,7 @@
 class Clause
 {
 public:
-  Clause(int _minV, int _maxV);
-  Clause(uint32_t _bufCapacity);
+  Clause(uint32_t varBufCapacity);
 
   ~Clause()
   {
@@ -35,44 +37,77 @@ public:
 //    free(elem);
   }
 
+  // 判定单子句
   bool isUnitClause();
+  // 获取单子句的变元
   bool getUnit(int *var);
   bool isUnitClauseFallback();
+  // 判定是否包含某个变元
   bool contains(int var);
+  int getVar(uint32_t idx);
+  bool verify(BitMap *resoMap);
 
   // 标记变量被去除
   void rmVar(int var);
-
   // 标记变量存在
   void addVar(int var);
+  void restore(ClauseEdit *edit);
 
-  bool suspectVar(int var);
-
-  void toString(char strbuf[]);
-
+  // 可读的变量 向 存储变量转换
   static uint32_t toBufferFormat(int var);
+  // 反向
   static int FromBufferFormat(uint32_t transformed);
-  // 缓存变量，全部缓存之后再处理
+  // 缓存变量
   void bufferVar(int var);
+  // 全部缓存之后转换为存储结构
   void finishBuffer();
-  // 程序退出时释放缓存
+  // 程序退出时释放缓存空间
   static void releaseBuf() { delete[] varBuf; }
 
-  // 经过转换后，子句内最小变量
-  uint32_t minTransformed;
-  uint32_t maxTransformed;
-  // 变量的最小序号
-  uint32_t base;
+  // 可读的子句
+  void toString(char strbuf[]);
 
-  uint32_t len;
+  // 经过转换后，子句内最小变量 minTransformed
+  uint32_t base;
+  // 最大
+  uint32_t maxTransformed;
+
+  // 底层存储结构
   bool *elem;
+  // 底层存储长度
+  uint32_t len;
+  // 子句里的变元个数
   uint32_t nVarInClause;
 
+  // 缓存结构
   static int *varBuf;
   static uint32_t bufCapacity;
   static uint32_t buffered;
 };
 
-int LogicNOT(uint32_t var);
+class ClauseEdit
+{
+public:
+  ClauseEdit(uint32_t _len)
+  {
+    deletedVar = new int[_len];
+    len = _len;
+    nDeleted = 0;
+  }
+  ~ClauseEdit()
+  {
+    delete[] deletedVar;
+  }
+
+  void delVar(int var)
+  {
+    deletedVar[nDeleted++] = var;
+  }
+  void reset() { nDeleted = 0; }
+
+  int *deletedVar;
+  uint32_t len;
+  uint32_t nDeleted;
+};
 
 #endif // CLAUSE_H

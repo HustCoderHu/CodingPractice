@@ -1,45 +1,40 @@
 #include "cnfedit.h"
+#include "clause.h"
 #include <string.h>
 
-CnfEdit::CnfEdit(uint32_t nClause, uint32_t _nVar)
+CnfEdit::CnfEdit(uint32_t _nClause, uint32_t _nVar)
 {
-  deletedClause = nullptr;
-  nVar = _nVar;
-  varVec = nullptr;
+  nClause = _nClause;
+  nVarPlusNOT = _nVar * 2;
+
+  deletedClause = new BitMap(nClause);
+  varVec = new BitMap*[nVarPlusNOT];
+  for (uint32_t i = 0; i < nVarPlusNOT; ++i)
+    varVec[i] = nullptr;
 }
 
 void CnfEdit::reset()
 {
-  if (deletedClause)
-    deletedClause->reset();
-  if (nullptr == varVec)
-    return;
-  for (uint32_t v = 0; v < nVar; ++v) {
+  deletedClause->reset();
+  for (uint32_t v = 0; v < nVarPlusNOT; ++v) {
     if (varVec[v])
       varVec[v]->reset();
   }
 }
 
-void CnfEdit::delClause(unsigned int pos)
+void CnfEdit::delClause(uint32_t pos)
 {
-  if (nullptr == deletedClause)
-    deletedClause = new BitMap(pos);
+  deletedClause->mayResize(pos+1);
   deletedClause->set(pos, true);
 }
 
-void CnfEdit::delClauseVar(unsigned int var, unsigned int pos)
+void CnfEdit::delClauseVar(int var, uint32_t pos)
 {
-  if (nullptr == varVec) {
-    varVec = new BitMap*[nVar];
-    memset(varVec, 0, sizeof(BitMap*) * var);
-//    for (int i = 0; i < nVar; ++i)
-//      varVec[i] = nullptr;
+  uint32_t transformed = Clause::toBufferFormat(var);
+  if (nullptr == varVec[transformed]) {
+    varVec[transformed] = new BitMap(pos+1);
+  } else {
+    varVec[transformed]->mayResize(pos+1);
   }
-
-  if (nullptr == varVec[var]) {
-    varVec[var] = new BitMap(pos+1);
-  }
-  if (pos >= varVec[var]->len)
-    varVec[var]->resize(pos+1);
-  varVec[var]->set(pos, true);
+  varVec[transformed]->set(pos, true);
 }

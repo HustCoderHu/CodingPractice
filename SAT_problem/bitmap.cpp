@@ -13,7 +13,7 @@ BitMap::BitMap(uint32_t _len)
 bool BitMap::set(uint32_t pos, bool flag)
 {
   if (pos >= len) {
-    printf("err: pos >= len, %d > %d\n", pos, len);
+    printf("%s err: pos >= len, %d > %d\n", __FUNCTION__, pos, len);
     return false;
   }
 
@@ -56,7 +56,7 @@ void BitMap::reset()
 bool BitMap::get(uint32_t pos)
 {
   if (pos >= len) {
-    printf("err: pos >= len, %d > %d\n", pos, len);
+    printf("%s err: pos >= len, %d > %d\n", __FUNCTION__, pos, len);
     return false;
   }
 
@@ -71,7 +71,7 @@ bool BitMap::get(uint32_t pos)
 
 bool BitMap::isAllFalse()
 {
-  for (uint32_t i = 0; i < len; ++i) {
+  for (uint32_t i = 0; i < ints; ++i) {
     if (intmap_[i] != 0)
       return false;
   }
@@ -80,9 +80,10 @@ bool BitMap::isAllFalse()
 
 void BitMap::resize(uint32_t _len)
 {
-  if (_len <= len)
-    return;
   uint32_t _ints = (_len + 31) / 32;
+  if (_ints <= ints)
+    return;
+
   uint32_t *intmap__ = new uint32_t[_ints];
   memcpy(intmap__, intmap_, sizeof(intmap_[0]) * ints);
   delete[] intmap_;
@@ -94,6 +95,13 @@ void BitMap::resize(uint32_t _len)
 void BitMap::OR(BitMap *other)
 {
   for (uint32_t i = 0; i < ints && i < other->ints; ++i) {
-    intmap_[i] ^= other->intmap_[i];
+    intmap_[i] |= other->intmap_[i];
+  }
+}
+
+void BitMap::show()
+{
+  for (int i = ints-1; i >= 0; --i) {
+    printf("%x ", intmap_[i]);
   }
 }

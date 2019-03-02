@@ -10,14 +10,16 @@
 class CnfEdit
 {
 public:
-  CnfEdit(uint32_t nClause, uint32_t _nVar);
+  CnfEdit(uint32_t _nClause, uint32_t _nVar);
 
   void reset();
-  void delClause(unsigned int pos);
-  void delClauseVar(unsigned int var, unsigned int pos);
+  void delClause(uint32_t pos);
+  void delClauseVar(int var, uint32_t pos);
 
   BitMap *deletedClause;
-  uint32_t nVar;
+  uint32_t nClause;
+  uint32_t nVarPlusNOT;
+  // varVec[trans] 记录变量 trans 从哪些子句里被移除
   BitMap **varVec;
 };
 

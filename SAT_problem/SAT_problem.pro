@@ -12,7 +12,8 @@ SOURCES += \
     cnfedit.cpp \
     test.cpp \
     test_clause.cpp \
-    test_cnf.cpp
+    test_cnf.cpp \
+    test_solver.cpp
 
 HEADERS += \
     _clause.h \

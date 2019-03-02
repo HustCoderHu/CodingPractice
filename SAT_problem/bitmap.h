@@ -18,9 +18,16 @@ public:
   bool get(uint32_t pos);
 
   bool isAllFalse();
+  void mayResize(uint32_t _len)
+  {
+    if (_len > len)
+      resize(_len);
+  }
   void resize(uint32_t _len);
 
   void OR(BitMap *other);
+
+  void show();
 
   uint32_t len;
   uint32_t ints;
