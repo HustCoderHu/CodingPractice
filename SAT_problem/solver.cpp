@@ -80,7 +80,7 @@ bool Solver::solve(Cnf *cnf)
 
   clock_t start, finish;
   start = clock();
-  s = _solve(cnf, 0);
+//  s = _solve(cnf, 0);
   finish = clock();
   t = (double)(finish - start) * 1000 / CLOCKS_PER_SEC;
   // TODO return

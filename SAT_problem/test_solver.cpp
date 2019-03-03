@@ -90,6 +90,15 @@ void test_solve()
   sl.solve(cnf);
   sl.showResult();
 
+  char buf[] = "-1 2 3 4 -5 -6 -7 8 9 10 11 -12 -13 14 15 -16 17 18 19 20 0";
+  int var;
+  char* token = strtok(buf, " ");
+  while ( token != NULL ) {
+    var = atoi(token);
+    token = strtok(NULL, " ");
+    sl.resoBmap->set(abs(var)-1, var > 0);
+  }
+
 //  Clause *cl;
 //  char buf1[] = "3 -5 18  0";
 //  cl = Cnf::parseLine(buf1);
