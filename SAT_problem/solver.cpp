@@ -6,6 +6,15 @@ using std::endl;
 
 Solver::Solver()
 {
+  s = 0;
+  resoBmap = nullptr;
+  t = 0;
+}
+
+Solver::~Solver()
+{
+  if (resoBmap != nullptr)
+    delete resoBmap;
 }
 
 /**
@@ -38,33 +47,33 @@ bool Solver::simplize(Cnf *cnf, int var, CnfEdit *edit)
   return true;
 }
 
-void Solver::showResult()
+void Solver::showResult(Cnf *cnf)
 {
   printf("s %d\n", s);
   // v
   printf("v");
-  for (uint32_t i = 0; i < resoBmap->len; ++i) {
-    if (resoBmap->get(i))
-      printf(" %d", i+1);
+  for (uint32_t i = 1; i <= cnf->nVar; ++i) {
+    if (getReso(i))
+      printf(" %d", i);
     else
-      printf(" -%d", i+1);
+      printf(" -%d", i);
   }
   printf("\n");
   printf("t %lu\n", t);
 }
 
-void Solver::result2file(const char *fpath)
+void Solver::result2file(Cnf *cnf, const char *fpath)
 {
   FILE *fp = fopen(fpath, "w+");
   // s
   fprintf(fp, "s %d\n", s);
   // v
   fprintf(fp, "v");
-  for (uint32_t i = 0; i < resoBmap->len; ++i) {
-    if (resoBmap->get(i))
-      fprintf(fp, " %d", i+1);
+  for (uint32_t i = 1; i <= cnf->nVar; ++i) {
+    if (getReso(i))
+      fprintf(fp, " %d", i);
     else
-      fprintf(fp, " -%d", i+1);
+      fprintf(fp, " -%d", i);
   }
   fprintf(fp, "\n");
   fprintf(fp, "t %lu", t);
@@ -73,17 +82,16 @@ void Solver::result2file(const char *fpath)
   fclose(fp);
 }
 
-bool Solver::solve(Cnf *cnf)
+int Solver::solve(Cnf *cnf)
 {
   resoBmap = new BitMap(cnf->nVar);
   resoBmap->reset();
-
   clock_t start, finish;
   start = clock();
-//  s = _solve(cnf, 0);
+  s = _solve(cnf, 0);
   finish = clock();
   t = (double)(finish - start) * 1000 / CLOCKS_PER_SEC;
-  // TODO return
+  return s;
 }
 
 int Solver::_solve(Cnf *cnf, int var)
@@ -92,20 +100,29 @@ int Solver::_solve(Cnf *cnf, int var)
   CnfEdit *edit = new CnfEdit(cnf->nClause, cnf->nVar);
   if (var != 0) {
     simplize(cnf, var, edit);
-    resoBmap->set(abs(var)-1, var>0);
+    setReso(var);
+//    resoBmap->set(abs(var)-1, var>0);
 //    cnf->show();
 //    cnf->bmap->show();
 //    cout << endl;
     if (cnf->isEmpty()) {// 全部被简化
       ret = 1;
+//      cout << __LINE__ << endl;
+//      cnf->show(); cout << endl;
       goto end;
     }
   }
   while (cnf->getSimple(&var)) {
+//    cout << "======================" << endl;
+//    cnf->show(); cout << endl;
+//    cout << "getSimple ::::::: " << var << endl << endl;
     if (simplize(cnf, var, edit)) {
-      resoBmap->set(abs(var)-1, var>0);
+      setReso(var);
+//      resoBmap->set(abs(var)-1, var>0);
       if (cnf->isEmpty()) {// 全部被简化
         ret = 1;
+//        cout << __LINE__ << endl;
+//        cnf->show(); cout << endl;
         goto end;
       }
     } else { // 单子句 -L 不能满足
@@ -116,19 +133,27 @@ int Solver::_solve(Cnf *cnf, int var)
 //  cnf->show();
 
   var = selectVar(cnf);
-  cout << "select: " << var << endl;
+//  cout << "select: " << var << endl;
   //  simplize(cnf, var, edit_branch);
   ret = _solve(cnf, var);
   if (1 == ret || -1 == ret) {
     ret = 1;
+//    cout << __LINE__ << endl;
+//    cnf->show(); cout << endl;
     goto end;
   }
   // 还原 CNF，验证另外一条分支
-  ret = _solve(cnf, var);
+  ret = _solve(cnf, -var);
   if (1 == ret || -1 == ret) {
     ret = 1;
+    goto end;
+//    cout << __LINE__ << endl;
+//    cnf->show(); cout << endl;
   }
+//  else
+//    cnf->show(); cout << endl;
   // 无解
+//  cout << var << -var << endl;
 end:
   cnf->restore(edit);
   delete edit;
@@ -138,8 +163,7 @@ end:
 int Solver::selectVar(Cnf *cnf)
 {
   // TODO
-//  Clause *cl = cnf->getShortestClause();
-  Clause *cl = cnf->getRandomClause();
+  Clause *cl = cnf->getShortestClause();
 //  char strbuf[20];
 //  cl->toString(strbuf);
 //  printf("%s \n", strbuf);
@@ -154,40 +178,10 @@ bool Solver::verify(Cnf *cnf)
     cl->toString(strbuf);
     if (!cl->verify(resoBmap)) {
 //      cl->toString(strbuf);
-      printf("idx: %d\n", i);
+      printf("clause idx: %d\n", i);
       printf("%s\n", strbuf);
     }
   }
+  cout << "Solver verify finish" << endl;
   return true;
 }
-
-Reso::Reso(uint32_t nVar)
-{
-  v = new BitMap(nVar);
-  len = nVar;
-//  varBuffer = new int[nVar];
-  nCur = 0;
-}
-
-void Reso::addVar(int var, bool flag)
-{
-  if (var > 0) {
-//    varBuffer[nCur++] = var;
-    v->set(var-1, flag);
-  } else {
-//    varBuffer[nCur++] = -var;
-    v->set(-var-1, !flag);
-  }
-}
-
-bool Reso::getReso(uint32_t var)
-{
-  return v->get(var-1);
-}
-
-void Reso::rollback(uint32_t n)
-{
-
-}
-
-
