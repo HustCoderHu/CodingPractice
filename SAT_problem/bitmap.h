@@ -6,10 +6,7 @@ class BitMap
 {
 public:
   BitMap(uint32_t _len);
-  ~BitMap()
-  {
-    delete[] intmap_;
-  }
+  ~BitMap() { delete[] intmap_; }
 
   bool set(uint32_t pos, bool flag);
   void reset();
