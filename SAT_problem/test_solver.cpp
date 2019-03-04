@@ -37,7 +37,6 @@ Cnf* buildCnf()
     clVec[nCur] = Cnf::parseLine(fileContent[nCur]);
     cnf->markClauseExist(nCur, true);
   }
-  cnf->nCur = nCur;
 
   return cnf;
 }
@@ -81,23 +80,27 @@ void test_solve()
 
 //  Cnf *cnf = buildCnf();
   Cnf *cnf = new Cnf();
-  const char *fpath = "D:/docs/github_repo/sat-20.cnf";
+//  const char *fpath = "E:/github_repo/unsat-5cnf-30.cnf";
+//  const char *fpath = "E:/github_repo/sat-20.cnf";
+//  const char *fpath = "E:/github_repo/ais10.cnf";
+  const char *fpath = "E:/github_repo/sud00009.cnf";
+//  const char *fpath = "D:/docs/github_repo/sat-20.cnf";
 //  const char *fpath = "D:/docs/github_repo/tst_v10_c100.cnf";
 //  const char *fpath = "D:/docs/github_repo/unsat-5cnf-30.cnf";
 
   cnf->parseFile(fpath);
   Solver sl;
   sl.solve(cnf);
-  sl.showResult();
+  sl.showResult(cnf);
 
-  char buf[] = "-1 2 3 4 -5 -6 -7 8 9 10 11 -12 -13 14 15 -16 17 18 19 20 0";
-  int var;
-  char* token = strtok(buf, " ");
-  while ( token != NULL ) {
-    var = atoi(token);
-    token = strtok(NULL, " ");
-    sl.resoBmap->set(abs(var)-1, var > 0);
-  }
+//  char buf[] = "-1 2 3 4 -5 -6 -7 8 9 10 11 -12 -13 14 15 -16 17 18 19 20 0";
+//  int var;
+//  char* token = strtok(buf, " ");
+//  while ( token != NULL ) {
+//    var = atoi(token);
+//    token = strtok(NULL, " ");
+//    sl.resoBmap->set(abs(var)-1, var > 0);
+//  }
 
 //  Clause *cl;
 //  char buf1[] = "3 -5 18  0";
@@ -105,6 +108,8 @@ void test_solve()
 //  cout << cl->verify(sl.resoBmap) << endl;
 //  cout << endl;
   sl.verify(cnf);
+
+//  delete cnf;
 }
 
 /*
