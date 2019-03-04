@@ -14,12 +14,10 @@ public:
 
   void parseFile(const char* fpath);
   static Clause* parseLine(char *buf);
-  static uint32_t countNvar(char buf[]);
 
   // 获取单子句里的变元
   bool getSimple(int *var);
   Clause *getShortestClause();
-  Clause *getRandomClause();
 
   // 所有子句都被简化了，解完成
   bool isEmpty() { return bmap->isAllFalse(); }
@@ -37,11 +35,8 @@ public:
 
   uint32_t nVar;
   uint32_t nClause;
-
-  uint32_t nCur;
-  Clause **clVec;
-
   BitMap *bmap; // 第i个子句是否还在 (没有被简化移除)
+  Clause **clVec;
 };
 
 #endif // CNF_H

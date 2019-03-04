@@ -12,20 +12,21 @@ Cnf::Cnf()
 {
   nVar = 0;
   nClause = 0;
-  nCur = 0;
-  clVec = nullptr;
   bmap = nullptr;
+  clVec = nullptr;
 }
 
 Cnf::~Cnf()
 {
-  delete bmap;
+  if (nullptr == bmap)
+    return;
   for (uint32_t i = 0; i < nClause; ++i) {
-    if (clVec[i]) {
+    if (clVec[i] != nullptr) {
       delete clVec;
     }
   }
   delete[] clVec;
+  delete bmap;
   Clause::releaseBuf();
 }
 
@@ -50,10 +51,10 @@ void Cnf::parseFile(const char *fpath)
   clVec = new Clause*[nClause];
   bmap = new BitMap(nClause);
 
-  for (nCur = 0; nCur < nClause; ++nCur) {
+  for (uint32_t i = 0; i < nClause; ++i) {
     fgets(buf, LINE_MAX_LEN, fp);
-    clVec[nCur] = parseLine(buf);
-    markClauseExist(nCur, true);
+    clVec[i] = parseLine(buf);
+    markClauseExist(i, true);
   }
 
   fclose(fp);
@@ -77,18 +78,6 @@ Clause *Cnf::parseLine(char *buf)
   return cl;
 }
 
-uint32_t Cnf::countNvar(char buf[])
-{
-  uint32_t nVar = 0;
-  char pre = ' ';
-  for (uint32_t i = 0; buf[i] != '\0'; ++i) {
-    if (isdigit(buf[i]) && (' ' == pre || '-' == pre))
-      ++nVar;
-    pre = buf[i];
-  }
-  return nVar;
-}
-
 bool Cnf::getSimple(int *var)
 {
   for (uint32_t i = 0; i < nClause; ++i) {
@@ -106,25 +95,12 @@ Clause *Cnf::getShortestClause()
   uint32_t minLen = -1;
   Clause *shortest = nullptr;
   for (uint32_t i = 0; i < nClause; ++i) {
-    if (existClause(i) && clVec[i]->nVarInClause < minLen) {
+    if (existClause(i) && clVec[i]->nVarInClause <= minLen) {
       minLen = clVec[i]->nVarInClause;
       shortest = clVec[i];
     }
   }
   return shortest;
-}
-
-Clause *Cnf::getRandomClause()
-{
-  int idx = rand() % (nClause>>3);
-  uint32_t j = 0;
-  for (uint32_t i = 0; i < idx; ++j) {
-    j = j >= nClause ? j-nClause : j;
-    if (existClause(j)) {
-      ++i;
-    }
-  }
-  return clVec[j];
 }
 
 void Cnf::show()
