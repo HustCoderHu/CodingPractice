@@ -3,17 +3,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-BitMap *createBitmap(uint32_t _len)
+Bitmap *createBitmap(uint32_t _len)
 {
-  BitMap *bmap = (BitMap*)malloc(sizeof(*bmap));
+  Bitmap *bmap = (Bitmap*)malloc(sizeof(*bmap));
   bmap->len = _len;
   bmap->ints = (_len + 31) / 32;
-  bmap->intmap_ = new uint32_t[bmap->ints];
+  bmap->intmap_ = (uint32_t*)malloc(sizeof(uint32_t) * bmap->ints);
   memset(bmap->intmap_, 0, sizeof(bmap->intmap_[0]) * bmap->ints);
   return bmap;
 }
 
-bool set(BitMap *bmap, uint32_t pos, bool flag)
+bool set(Bitmap *bmap, uint32_t pos, bool flag)
 {
   if (pos >= bmap->len) {
     printf("%s err: pos >= len, %d > %d\n", __FUNCTION__, pos, bmap->len);
@@ -34,13 +34,13 @@ bool set(BitMap *bmap, uint32_t pos, bool flag)
   return true;
 }
 
-void reset(BitMap *bmap)
+void resetBitmap(Bitmap *bmap)
 {
   memset(bmap->intmap_, 0, sizeof(bmap->intmap_[0]) * bmap->ints);
   return;
 }
 
-bool get(BitMap *bmap, uint32_t pos)
+bool get(Bitmap *bmap, uint32_t pos)
 {
   if (pos >= bmap->len) {
     printf("%s err: pos >= len, %d > %d\n", __FUNCTION__, pos, bmap->len);
@@ -56,7 +56,7 @@ bool get(BitMap *bmap, uint32_t pos)
   return false;
 }
 
-bool isAllFalse(BitMap *bmap)
+bool isAllFalse(Bitmap *bmap)
 {
   for (uint32_t i = 0; i < bmap->ints; ++i) {
     if (bmap->intmap_[i] != 0)
@@ -65,34 +65,34 @@ bool isAllFalse(BitMap *bmap)
   return true;
 }
 
-void mayResize(BitMap *bmap, uint32_t _len)
+void mayResize(Bitmap *bmap, uint32_t _len)
 {
   if (_len > bmap->len)
     resize(bmap, _len);
 }
 
-void resize(BitMap *bmap, uint32_t _len)
+void resize(Bitmap *bmap, uint32_t _len)
 {
   uint32_t _ints = (_len + 31) / 32;
   if (_ints <= bmap->ints)
     return;
 
-  uint32_t *intmap__ = new uint32_t[_ints];
+  uint32_t *intmap__ =  (uint32_t*)malloc(sizeof(*intmap__) * _ints);
   memcpy(intmap__, bmap->intmap_, sizeof(bmap->intmap_[0]) * bmap->ints);
-  delete[] bmap->intmap_;
+  free(bmap->intmap_);
   bmap->len = _len;
   bmap->ints = _ints;
   bmap->intmap_ = intmap__;
 }
 
-void OR(BitMap *bmap, BitMap *other)
+void OR(Bitmap *bmap, Bitmap *other)
 {
   for (uint32_t i = 0; i < bmap->ints && i < other->ints; ++i) {
     bmap->intmap_[i] |= other->intmap_[i];
   }
 }
 
-void show(BitMap *bmap)
+void show(Bitmap *bmap)
 {
   for (int i = bmap->ints-1; i >= 0; --i) {
     printf("%x ", bmap->intmap_[i]);

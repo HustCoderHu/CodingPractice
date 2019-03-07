@@ -1,6 +1,6 @@
 #include "clause.h"
 
-int *varBuf = nullptr;
+int *varBuf = NULL;
 uint32_t bufCapacity = 10;
 uint32_t buffered = 0;
 
@@ -10,11 +10,11 @@ Clause *createClause(uint32_t varBufCapacity)
   cl->base = -1; // uint32_t max
   //  minTransformed = -1; // uint32_t max
   cl->maxTransformed = 0;
-  cl->elem = nullptr;
+  cl->elem = NULL;
   cl->len = 0;
   cl->nVarInClause = 0;
 
-  if (nullptr == varBuf) {
+  if (NULL == varBuf) {
     bufCapacity = varBufCapacity;
     varBuf = (int*)malloc(sizeof(int)*bufCapacity);
   }
@@ -22,7 +22,7 @@ Clause *createClause(uint32_t varBufCapacity)
   return cl;
 }
 
-void destroy(Clause *cl)
+void destroyClause(Clause *cl)
 {
   if(cl->elem != NULL)
     free(cl->elem);
@@ -72,6 +72,24 @@ bool contains(Clause *cl, int var)
         false : cl->elem[transformed-cl->base];
 }
 
+void markVarExist(Clause *cl, int var, bool flag)
+{
+  uint32_t base = cl->base;
+  uint32_t len = cl->len;
+  uint32_t transformed = toBufferFormat(var);
+  if (transformed < base || transformed >= base + len)
+    return;
+  if (flag == cl->elem[transformed-base])
+    return;
+  if (flag) {
+    cl->elem[transformed-base] = true;
+    ++cl->nVarInClause;
+  } else {
+    cl->elem[transformed-base] = false;
+    --cl->nVarInClause;
+  }
+}
+
 int getVar(Clause *cl, uint32_t idx)
 {
   uint32_t varIdx = 0;
@@ -87,7 +105,7 @@ int getVar(Clause *cl, uint32_t idx)
   return -1;
 }
 
-bool verify(Clause *cl, BitMap *resoMap)
+bool verifyClause(Clause *cl, Bitmap *resoMap)
 {
   bool res = false;
   for (uint32_t i = 0; i < cl->len; ++i) {
@@ -172,9 +190,9 @@ void bufferVar(Clause *cl, int var)
   // 超出缓存空间，缓存扩容
   if (buffered >= bufCapacity) {
     uint32_t newCapacity = bufCapacity + (bufCapacity >> 1); // 容量 1.5 倍
-    int *newBuf = new int[newCapacity];
+    int *newBuf = (int*)malloc(sizeof(*newBuf) * newCapacity);
     memcpy(newBuf, varBuf, buffered);
-    delete[] varBuf;
+    free(varBuf);
     varBuf = newBuf;
   }
   uint32_t transformed = toBufferFormat(var);
@@ -189,7 +207,7 @@ void finishBuffer(Clause *cl)
   //  cl->base = minTransformed >> 1;
   cl->len = ((cl->maxTransformed>>1) - (cl->base>>1)) + 1; // 变量个数，不包括取反
   cl->len <<= 1; // 记录反变量的空间
-  cl->elem = new bool[cl->len]; //malloc(sizeof(int) * n);
+  cl->elem = malloc(sizeof(bool) * cl->len);
   memset(cl->elem, 0, sizeof(cl->elem[0]) * cl->len);
 
   for (uint32_t i = 0; i < buffered; ++i) {
@@ -206,3 +224,5 @@ void releaseBuf()
   if (varBuf != NULL)
     free(varBuf);
 }
+
+
