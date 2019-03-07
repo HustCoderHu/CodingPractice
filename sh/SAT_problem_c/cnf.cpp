@@ -4,17 +4,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-static uint32_t lenInt(int v);
-
-//#define LINE_MAX_LEN 80
-
-Cnf::Cnf()
-{
-  nVar = 0;
-  nClause = 0;
-  bmap = nullptr;
-  clVec = nullptr;
-}
+const uint32_t LINE_MAX_LEN = 80;
 
 Cnf::~Cnf()
 {
@@ -30,6 +20,30 @@ Cnf::~Cnf()
   Clause::releaseBuf();
 }
 
+Cnf *createCnf()
+{
+  Cnf *cnf = (Cnf*)malloc(sizeof(*cnf));
+  cnf->nVar = 0;
+  cnf->nClause = 0;
+  cnf->bmap = nullptr;
+  clVec = nullptr;
+}
+
+void destroy(Cnf *cnf)
+{
+  if (nullptr == cnf->bmap)
+    return;
+  for (uint32_t i = 0; i < nClause; ++i) {
+    if (clVec[i] != nullptr) {
+      delete clVec;
+    }
+  }
+  free(cnf->clVec);
+  free(cnf->bmap)
+  Clause::releaseBuf();
+}
+
+
 void Cnf::parseFile(const char *fpath)
 {
   FILE *fp = fopen(fpath, "r");
@@ -43,15 +57,15 @@ void Cnf::parseFile(const char *fpath)
     fgets(buf, LINE_MAX_LEN, fp);
   }
   // p
-  sscanf(buf, "p cnf %d %d", &nVar, &nClause);
+  sscanf(buf, "p cnf %d %d", &cnf->nVar, &cnf->nClause);
 
-  cout << "nVar: " << nVar << endl;
-  cout << "nClause: " << nClause << endl;
+  cout << "nVar: " << cnf->nVar << endl;
+  cout << "nClause: " << cnf->nClause << endl;
 
-  clVec = new Clause*[nClause];
-  bmap = new BitMap(nClause);
+  clVec = new Clause*[cnf->nClause];
+  cnf->bmap = new BitMap(cnf->nClause);
 
-  for (uint32_t i = 0; i < nClause; ++i) {
+  for (uint32_t i = 0; i < cnf->nClause; ++i) {
     fgets(buf, LINE_MAX_LEN, fp);
     clVec[i] = parseLine(buf);
     markClauseExist(i, true);
@@ -78,9 +92,9 @@ Clause *Cnf::parseLine(char *buf)
   return cl;
 }
 
-bool Cnf::getSimple(int *var)
+bool Cnf::getSimple(Cnf *cnf, int *var)
 {
-  for (uint32_t i = 0; i < nClause; ++i) {
+  for (uint32_t i = 0; i < cnf->nClause; ++i) {
     if (existClause(i)) {
       if (clVec[i]->getUnit(var)) {
         return true;
@@ -90,11 +104,11 @@ bool Cnf::getSimple(int *var)
   return false;
 }
 
-Clause *Cnf::getShortestClause()
+Clause *Cnf::getShortestClause(Cnf *cnf)
 {
   uint32_t minLen = -1;
   Clause *shortest = nullptr;
-  for (uint32_t i = 0; i < nClause; ++i) {
+  for (uint32_t i = 0; i < cnf->nClause; ++i) {
     if (existClause(i) && clVec[i]->nVarInClause <= minLen) {
       minLen = clVec[i]->nVarInClause;
       shortest = clVec[i];
@@ -103,10 +117,10 @@ Clause *Cnf::getShortestClause()
   return shortest;
 }
 
-void Cnf::show()
+void Cnf::show(Cnf *cnf)
 {
   char display[80];
-  for (uint32_t i = 0; i < nClause; ++i) {
+  for (uint32_t i = 0; i < cnf->nClause; ++i) {
     if (existClause(i)) {
       clVec[i]->toString(display);
       printf("%s\n", display);
@@ -114,21 +128,21 @@ void Cnf::show()
   }
 }
 
-bool Cnf::existClause(uint32_t pos)
+bool Cnf::existClause(Cnf *cnf, uint32_t pos)
 {
-  return bmap->get(pos);
+  return get(cnf->bmap, pos);
 }
 
-void Cnf::markClauseExist(uint32_t pos, bool exist)
+void Cnf::markClauseExist(Cnf *cnf, uint32_t pos, bool exist)
 {
-  bmap->set(pos, exist);
+  set(cnf->bmap, pos, exist);
 }
 
-void Cnf::restore(CnfEdit *edit)
+void Cnf::restore(Cnf *cnf, CnfEdit *edit)
 {
   //  BitMap *deletedClause = edit->deletedClause;
   if (edit->deletedClause != nullptr)
-    bmap->OR(edit->deletedClause); // 还原子句的存在情况
+    OR(cnf->bmap, edit->deletedClause); // 还原子句的存在情况
 
   BitMap **varVec = edit->varVec;
   if (nullptr == varVec)
@@ -144,18 +158,4 @@ void Cnf::restore(CnfEdit *edit)
       }
     }
   }
-}
-
-static uint32_t lenInt(int v)
-{
-  if (v < 0)
-    v = -v;
-  unsigned int len = 1;
-
-  v /= 10;
-  while (v != 0) {
-    ++len;
-    v /= 10;
-  }
-  return len;
 }
