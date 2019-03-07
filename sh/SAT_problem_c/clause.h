@@ -9,8 +9,6 @@
 
 //#include <stdbool.h> // bool in C
 
-class ClauseEdit;
-
 /**
  * @brief The Clause class
  * 至少两个单元表示 L -L
@@ -26,17 +24,8 @@ class ClauseEdit;
  * transformed = base + 数组下标
  */
 
-class Clause
+typedef struct
 {
-public:
-  Clause(uint32_t varBufCapacity);
-
-  ~Clause()
-  {
-    delete[] elem;
-//    free(elem);
-  }
-
   // 经过转换后，子句内最小变量 minTransformed
   uint32_t base;
   // 最大
@@ -48,10 +37,10 @@ public:
   uint32_t len;
   // 子句里的变元个数
   uint32_t nVarInClause;
-};
+} Clause;
 
 Clause *createClause(uint32_t varBufCapacity);
-void destroy(Clause *cl);
+void destroyClause(Clause *cl);
 
 // 判定单子句
 bool isUnitClause(Clause *cl);
@@ -60,8 +49,10 @@ bool getUnit(Clause *cl, int *var);
 bool isUnitClauseFallback(Clause *cl);
 // 判定是否包含某个变元
 bool contains(Clause *cl, int var);
+// 标记变量存在 或者 被去除
+void markVarExist(Clause *cl, int var, bool flag);
 int getVar(Clause *cl, uint32_t idx);
-bool verify(Clause *cl, BitMap *resoMap);
+bool verifyClause(Clause *cl, Bitmap *resoMap);
 
 // 标记变量被去除
 void rmVar(Clause *cl, int var);
@@ -73,7 +64,7 @@ uint32_t toBufferFormat(int var);
 // 反向
 int FromBufferFormat(uint32_t transformed);
 // 缓存变量
-void bufferVar(int var);
+void bufferVar(Clause *cl, int var);
 // 全部缓存之后转换为存储结构
 void finishBuffer(Clause *cl);
 // 程序退出时释放缓存空间

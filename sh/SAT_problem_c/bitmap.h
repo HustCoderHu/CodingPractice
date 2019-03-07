@@ -1,28 +1,28 @@
 #ifndef BITMAP_H
 #define BITMAP_H
 #include <stdint.h>
+#include <stdbool.h>
 
-struct BitMap
+typedef struct
 {
   uint32_t len;
   uint32_t ints;
   uint32_t *intmap_;
-
 //  unsigned int count; // 有效的位数
-};
+} Bitmap;
 
-BitMap* createBitmap(uint32_t _len);
-bool set(BitMap *bmap, uint32_t pos, bool flag);
-void reset(BitMap *bmap);
+Bitmap* createBitmap(uint32_t _len);
+bool set(Bitmap *bmap, uint32_t pos, bool flag);
+void resetBitmap(Bitmap *bmap);
 
-bool get(BitMap *bmap, uint32_t pos);
+bool get(Bitmap *bmap, uint32_t pos);
 
-bool isAllFalse(BitMap *bmap);
-void mayResize(BitMap *bmap, uint32_t _len);
-void resize(BitMap *bmap, uint32_t _len);
+bool isAllFalse(Bitmap *bmap);
+void mayResize(Bitmap *bmap, uint32_t _len);
+void resize(Bitmap *bmap, uint32_t _len);
 
-void OR(BitMap *bmap, BitMap *other);
+void OR(Bitmap *bmap, Bitmap *other);
 
-void show(BitMap *bmap);
+void show(Bitmap *bmap);
 
 #endif // BITMAP_H
