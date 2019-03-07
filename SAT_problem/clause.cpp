@@ -48,6 +48,22 @@ bool Clause::contains(int var)
         false : elem[transformed-base];
 }
 
+void Clause::markVarExist(int var, bool flag)
+{
+  uint32_t transformed = toBufferFormat(var);
+  if (transformed < base || transformed >= base + len)
+    return;
+  if (flag == elem[transformed-base])
+    return;
+  if (flag) {
+    elem[transformed-base] = true;
+    ++nVarInClause;
+  } else {
+    elem[transformed-base] = false;
+    --nVarInClause;
+  }
+}
+
 int Clause::getVar(uint32_t idx)
 {
   uint32_t varIdx = 0;
@@ -79,33 +95,6 @@ bool Clause::verify(BitMap *resoMap)
     }
   }
   return res;
-}
-
-void Clause::rmVar(int var)
-{
-  uint32_t transformed = toBufferFormat(var);
-  if (transformed < base || transformed >= base + len)
-    return;
-  if (true == elem[transformed-base]) {
-    elem[transformed-base] = false;
-    --nVarInClause;
-  }
-}
-
-void Clause::addVar(int var)
-{
-  uint32_t transformed = toBufferFormat(var);
-  if (transformed < base || transformed >= base + len)
-    return;
-  if (false == elem[transformed-base]) {
-    elem[transformed-base] = true;
-    ++nVarInClause;
-  }
-}
-
-void Clause::restore(ClauseEdit *edit)
-{
-
 }
 
 void Clause::toString(char strbuf[])
@@ -170,7 +159,7 @@ void Clause::finishBuffer()
   //  base = minTransformed >> 1;
   len = ((maxTransformed>>1) - (base>>1)) + 1; // 变量个数，不包括取反
   len <<= 1; // 记录反变量的空间
-  elem = new bool[len]; //malloc(sizeof(int) * n);
+  elem = new uint16_t[len]; //malloc(sizeof(int) * n);
   memset(elem, 0, sizeof(elem[0]) * len);
 
   for (uint32_t i = 0; i < buffered; ++i) {

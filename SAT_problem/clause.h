@@ -44,14 +44,10 @@ public:
   bool isUnitClauseFallback();
   // 判定是否包含某个变元
   bool contains(int var);
+  // 标记变量存在 或者 被去除
+  void markVarExist(int var, bool flag);
   int getVar(uint32_t idx);
   bool verify(BitMap *resoMap);
-
-  // 标记变量被去除
-  void rmVar(int var);
-  // 标记变量存在
-  void addVar(int var);
-  void restore(ClauseEdit *edit);
 
   // 可读的变量 向 存储变量转换
   static uint32_t toBufferFormat(int var);
@@ -73,7 +69,7 @@ public:
   uint32_t maxTransformed;
 
   // 底层存储结构
-  bool *elem;
+  uint16_t *elem;
   // 底层存储长度
   uint32_t len;
   // 子句里的变元个数
