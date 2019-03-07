@@ -10,17 +10,19 @@ CnfEdit* createCnfEdit(uint32_t _nClause, uint32_t _nVar)
   edit->nVarPlusNOT = _nVar * 2;
 
   edit->deletedClause = createBitmap(edit->nClause);
-  edit->varVec = (BitMap**)malloc(sizeof(BitMap*) * edit->nVarPlusNOT);
+  edit->varVec = (Bitmap**)malloc(sizeof(Bitmap*) * edit->nVarPlusNOT);
   for (uint32_t i = 0; i < edit->nVarPlusNOT; ++i)
-    edit->varVec[i] = nullptr;
+    edit->varVec[i] = NULL;
+
+  return edit;
 }
 
-void reset(CnfEdit *edit)
+void resetCnfEdit(CnfEdit *edit)
 {
-  reset(edit->deletedClause);
+  resetBitmap(edit->deletedClause);
   for (uint32_t v = 0; v < edit->nVarPlusNOT; ++v) {
     if (edit->varVec[v])
-      reset(edit->varVec[v]);
+      resetBitmap(edit->varVec[v]);
   }
 }
 
@@ -33,7 +35,7 @@ void delClause(CnfEdit* edit, uint32_t pos)
 void delClauseVar(CnfEdit* edit, int var, uint32_t pos)
 {
   uint32_t transformed = toBufferFormat(var);
-  if (nullptr == edit->varVec[transformed]) {
+  if (NULL == edit->varVec[transformed]) {
     edit->varVec[transformed] = createBitmap(pos+1);
   } else {
     mayResize(edit->varVec[transformed], pos);
