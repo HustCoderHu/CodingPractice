@@ -140,7 +140,7 @@ void Cnf::restore(CnfEdit *edit)
     uint32_t var = Clause::FromBufferFormat(transformed);
     for (uint32_t p = 0; p < posMap->len; ++p) {
       if (posMap->get(p)) {
-        clVec[p]->addVar(var);
+        clVec[p]->markVarExist(var, true);
       }
     }
   }

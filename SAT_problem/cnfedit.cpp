@@ -13,6 +13,15 @@ CnfEdit::CnfEdit(uint32_t _nClause, uint32_t _nVar)
     varVec[i] = nullptr;
 }
 
+CnfEdit::~CnfEdit()
+{
+  if (deletedClause != nullptr)
+    delete deletedClause;
+  for (uint32_t i = 0; i < nVarPlusNOT; ++i)
+    if (varVec[i] != nullptr)
+      delete varVec;
+}
+
 void CnfEdit::reset()
 {
   deletedClause->reset();

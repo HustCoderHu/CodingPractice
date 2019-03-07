@@ -40,7 +40,7 @@ bool Solver::simplize(Cnf *cnf, int var, CnfEdit *edit)
     if (cl->contains(-var)) { // 包含 -L
       if (cl->isUnitClause()) // 单子句 -L 不能满足
         return false;
-      cl->rmVar(-var);
+      cl->markVarExist(-var, false);
       edit->delClauseVar(-var, pos);
     }
   }

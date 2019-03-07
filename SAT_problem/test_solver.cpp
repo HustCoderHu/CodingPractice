@@ -79,12 +79,17 @@ void test_solve()
 //  return;
 
 //  Cnf *cnf = buildCnf();
+  cout << sizeof(bool) << endl;
   Cnf *cnf = new Cnf();
-//  const char *fpath = "E:/github_repo/unsat-5cnf-30.cnf";
+
 //  const char *fpath = "E:/github_repo/sat-20.cnf";
 //  const char *fpath = "E:/github_repo/ais10.cnf";
-  const char *fpath = "E:/github_repo/sud00009.cnf";
+//  const char *fpath = "E:/github_repo/sud00009.cnf";
+//  const char *fpath = "E:/github_repo/unsat-5cnf-30.cnf";
+
 //  const char *fpath = "D:/docs/github_repo/sat-20.cnf";
+//  const char *fpath = "D:/docs/github_repo/ais10.cnf";
+  const char *fpath = "D:/docs/github_repo/sud00009.cnf";
 //  const char *fpath = "D:/docs/github_repo/tst_v10_c100.cnf";
 //  const char *fpath = "D:/docs/github_repo/unsat-5cnf-30.cnf";
 

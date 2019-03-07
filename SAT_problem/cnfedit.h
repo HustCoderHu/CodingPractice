@@ -11,6 +11,7 @@ class CnfEdit
 {
 public:
   CnfEdit(uint32_t _nClause, uint32_t _nVar);
+  ~CnfEdit();
 
   void reset();
   void delClause(uint32_t pos);
