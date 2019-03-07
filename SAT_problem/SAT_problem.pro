@@ -16,8 +16,6 @@ SOURCES += \
     test_solver.cpp
 
 HEADERS += \
-    _clause.h \
-    _cnf.h \
     clause.h \
     cnf.h \
     solver.h \
