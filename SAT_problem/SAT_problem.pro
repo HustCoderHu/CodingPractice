@@ -4,7 +4,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        main.c \
     clause.cpp \
     cnf.cpp \
     solver.cpp \
@@ -13,7 +12,8 @@ SOURCES += \
     test.cpp \
     test_clause.cpp \
     test_cnf.cpp \
-    test_solver.cpp
+    test_solver.cpp \
+    main.cpp
 
 HEADERS += \
     clause.h \
