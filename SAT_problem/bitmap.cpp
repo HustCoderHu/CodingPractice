@@ -28,6 +28,7 @@ bool BitMap::set(uint32_t pos, bool flag)
     ruler = ~ruler;
     intmap_[int_pos] &= ruler;
   }
+  return true;
 }
 
 void BitMap::reset()
