@@ -74,8 +74,8 @@ void releaseBuf();
 void toString(Clause *cl, char strbuf[]);
 
 // 缓存结构
-extern int *varBuf;
-extern uint32_t bufCapacity;
-extern uint32_t buffered;
+//extern int *varBuf;
+//extern uint32_t bufCapacity;
+//extern uint32_t buffered;
 
 #endif // CLAUSE_H

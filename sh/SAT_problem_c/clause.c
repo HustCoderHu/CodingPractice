@@ -1,8 +1,9 @@
 #include "clause.h"
 
-int *varBuf = NULL;
-uint32_t bufCapacity = 10;
-uint32_t buffered = 0;
+// 缓存结构
+static int *varBuf = NULL;
+static uint32_t bufCapacity = 10;
+static uint32_t buffered = 0;
 
 Clause *createClause(uint32_t varBufCapacity)
 {
@@ -32,7 +33,8 @@ bool isUnitClause(Clause *cl)
 {
   if (cl->nVarInClause != 1)
     return false;
-  for (uint32_t i = 0; i < cl->len; ++i) {
+  uint32_t i;
+  for (i = 0; i < cl->len; ++i) {
     if (cl->elem[i])
       return true;
   }
@@ -43,7 +45,8 @@ bool getUnit(Clause *cl, int *var)
 {
   if (cl->nVarInClause != 1)
     return false;
-  for (uint32_t i = 0; i < cl->len; ++i) {
+  uint32_t i;
+  for (i = 0; i < cl->len; ++i) {
     if (cl->elem[i]) {
       uint32_t transformed = cl->base + i;
       *var = FromBufferFormat(transformed);
@@ -56,7 +59,8 @@ bool getUnit(Clause *cl, int *var)
 bool isUnitClauseFallback(Clause *cl)
 {
   bool found = false;
-  for(uint32_t i = 0; i < cl->len; ++i) {
+  uint32_t i;
+  for(i = 0; i < cl->len; ++i) {
     if (cl->elem[i] != 0)
       if (!found)
         found = true;
@@ -93,7 +97,8 @@ void markVarExist(Clause *cl, int var, bool flag)
 int getVar(Clause *cl, uint32_t idx)
 {
   uint32_t varIdx = 0;
-  for (uint32_t i = 0; i < cl->len; ++i) {
+  uint32_t i;
+  for (i = 0; i < cl->len; ++i) {
     if (cl->elem[i]) {
       if (varIdx == idx) {
         uint32_t transformed = cl->base + i;
@@ -108,7 +113,8 @@ int getVar(Clause *cl, uint32_t idx)
 bool verifyClause(Clause *cl, Bitmap *resoMap)
 {
   bool res = false;
-  for (uint32_t i = 0; i < cl->len; ++i) {
+  uint32_t i;
+  for (i = 0; i < cl->len; ++i) {
     if (cl->elem[i]) {
       uint32_t transformed = cl->base + i;
       int var = FromBufferFormat(transformed);
@@ -148,7 +154,8 @@ void addVar(Clause *cl, int var)
 void toString(Clause *cl, char strbuf[])
 {
   uint32_t strlen = 0;
-  for (uint32_t offset = 0; offset < cl->len; ++offset) {
+  uint32_t offset;
+  for (offset = 0; offset < cl->len; ++offset) {
     if (cl->elem[offset]) {
       uint32_t transformed = cl->base + offset;
       int var = FromBufferFormat(transformed);
@@ -207,10 +214,12 @@ void finishBuffer(Clause *cl)
   //  cl->base = minTransformed >> 1;
   cl->len = ((cl->maxTransformed>>1) - (cl->base>>1)) + 1; // 变量个数，不包括取反
   cl->len <<= 1; // 记录反变量的空间
-  cl->elem = malloc(sizeof(bool) * cl->len);
+  cl->elem = malloc(sizeof(cl->elem[0]) * cl->len);
+//  printf("%s: cl->elem = %p\n", __FUNCTION__, cl->elem);
   memset(cl->elem, 0, sizeof(cl->elem[0]) * cl->len);
 
-  for (uint32_t i = 0; i < buffered; ++i) {
+  uint32_t i;
+  for (i = 0; i < buffered; ++i) {
     uint32_t transformed = varBuf[i];
     if (cl->elem[transformed-cl->base] == false) {
       cl->elem[transformed-cl->base] = true;
@@ -221,8 +230,10 @@ void finishBuffer(Clause *cl)
 
 void releaseBuf()
 {
-  if (varBuf != NULL)
+  if (varBuf != NULL) {
     free(varBuf);
+    varBuf = NULL;
+  }
 }
 
 

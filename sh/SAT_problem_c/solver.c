@@ -1,12 +1,22 @@
 #include "solver.h"
 #include <time.h>
 
-Solver *createSolver()
+typedef int (*func_selectVar)(Cnf *cnf);
+
+static func_selectVar selectVarFuncArray[] = {
+  selectVar_shortestClause,
+  selectVar_firstClause
+};
+
+Solver *createSolver(VAR_SELECT_STRATEGE s)
 {
   Solver *sl = (Solver*)malloc(sizeof(*sl));
+  // 变量选择策略
+  sl->selectVar = selectVarFuncArray[s];
   sl->s = 0;
   sl->resoBmap = NULL;
   sl->t = 0;
+  return sl;
 }
 
 void destroySolver(Solver *sl)
@@ -26,7 +36,7 @@ void destroySolver(Solver *sl)
  * @param edit
  * @return bool, false if 存在单子句 -var
  */
-bool simplize(Solver *sl, Cnf *cnf, int var, CnfEdit *edit)
+bool simplize(Cnf *cnf, int var, CnfEdit *edit)
 {
   for (int pos = cnf->nClause - 1; pos >= 0; --pos) {
     if (existClause(cnf, pos) == false) // 子句已被简化为空
@@ -52,13 +62,13 @@ void showResult(Solver *sl, Cnf *cnf)
 {
   printf("s %d\n", sl->s);
   // v
-  printf("v");
-  for (uint32_t i = 1; i <= cnf->nVar; ++i) {
-    if (getReso(sl, i))
-      printf(" %d", i);
-    else
-      printf(" -%d", i);
-  }
+//  printf("v");
+//  for (uint32_t i = 1; i <= cnf->nVar; ++i) {
+//    if (getReso(sl, i))
+//      printf(" %d", i);
+//    else
+//      printf(" -%d", i);
+//  }
   printf("\n");
   printf("t %lu\n", sl->t);
 }
@@ -91,7 +101,7 @@ int solve(Solver *sl, Cnf *cnf)
 
   clock_t start, finish;
   start = clock();
-  sl->resoBmap = _solve(sl, cnf, 0);
+  sl->s = _solve(sl, cnf, 0);
   finish = clock();
   sl->t = (double)(finish - start) * 1000 / CLOCKS_PER_SEC;
   return sl->s;
@@ -102,7 +112,7 @@ int _solve(Solver *sl, Cnf *cnf, int var)
   int ret = 0;
   CnfEdit *edit = createCnfEdit(cnf->nClause, cnf->nVar);
   if (var != 0) {
-    simplize(sl, cnf, var, edit);
+    simplize(cnf, var, edit);
     setReso(sl, var);
     //    resoBmap->set(abs(var)-1, var>0);
     //    cnf->show();
@@ -119,7 +129,7 @@ int _solve(Solver *sl, Cnf *cnf, int var)
     //    cout << "======================" << endl;
     //    cnf->show(); cout << endl;
     //    cout << "getSimple ::::::: " << var << endl << endl;
-    if (simplize(sl, cnf, var, edit)) {
+    if (simplize(cnf, var, edit)) {
       setReso(sl, var);
       //      resoBmap->set(abs(var)-1, var>0);
       if (isEmpty(cnf)) {// 全部被简化
@@ -135,7 +145,7 @@ int _solve(Solver *sl, Cnf *cnf, int var)
   }
   //  cnf->show();
 
-  var = selectVar(sl, cnf);
+  var = sl->selectVar(cnf);
   //  cout << "select: " << var << endl;
   //  simplize(cnf, var, edit_branch);
   ret = _solve(sl, cnf, var);
@@ -163,13 +173,18 @@ end:
   return ret;
 }
 
-int selectVar(Solver *sl, Cnf *cnf)
+int selectVar_shortestClause(Cnf *cnf)
 {
-  // TODO
   Clause *cl = getShortestClause(cnf);
   //  char strbuf[20];
   //  cl->toString(strbuf);
   //  printf("%s \n", strbuf);
+  return getVar(cl, 0);
+}
+
+int selectVar_firstClause(Cnf *cnf)
+{
+  Clause *cl = getFirstExistClause(cnf);
   return getVar(cl, 0);
 }
 
@@ -196,5 +211,5 @@ void setReso(Solver *sl, int var)
 
 bool getReso(Solver *sl, uint32_t var)
 {
-  return sl->resoBmap->get(var-1);
+  return get(sl->resoBmap, var-1);
 }

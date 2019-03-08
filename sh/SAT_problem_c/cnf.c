@@ -17,14 +17,14 @@ void destroyCnf(Cnf *cnf)
   if (NULL == cnf->bmap)
     return;
   Clause **clVec = cnf->clVec;
-  for (uint32_t i = 0; i < cnf->nClause; ++i) {
+  uint32_t i;
+  for (i = 0; i < cnf->nClause; ++i) {
     if (clVec[i] != NULL) {
       free(clVec[i]);
     }
   }
   free(clVec);
   free(cnf->bmap);
-  releaseBuf();
 }
 
 void parseFile(Cnf *cnf, const char* fpath)
@@ -50,7 +50,8 @@ void parseFile(Cnf *cnf, const char* fpath)
   cnf->clVec = clVec;
   cnf->bmap = createBitmap(cnf->nClause);
 
-  for (uint32_t i = 0; i < cnf->nClause; ++i) {
+  uint32_t i;
+  for (i = 0; i < cnf->nClause; ++i) {
     fgets(buf, LINE_MAX_LEN, fp);
     clVec[i] = parseLine(buf);
     markClauseExist(cnf, i, true);
@@ -79,7 +80,8 @@ Clause *parseLine(char *buf)
 
 bool getSimple(Cnf *cnf, int *var)
 {
-  for (uint32_t i = 0; i < cnf->nClause; ++i) {
+  uint32_t i;
+  for (i = 0; i < cnf->nClause; ++i) {
     if (existClause(cnf, i)) {
       Clause **clVec = cnf->clVec;
       if (getUnit(clVec[i], var))
@@ -94,13 +96,24 @@ Clause *getShortestClause(Cnf *cnf)
   Clause **clVec = cnf->clVec;
   uint32_t minLen = -1;
   Clause *shortest = NULL;
-  for (uint32_t i = 0; i < cnf->nClause; ++i) {
+  uint32_t i;
+  for (i = 0; i < cnf->nClause; ++i) {
     if (existClause(cnf, i) && clVec[i]->nVarInClause <= minLen) {
       minLen = clVec[i]->nVarInClause;
       shortest = clVec[i];
     }
   }
   return shortest;
+}
+
+Clause *getFirstExistClause(Cnf *cnf)
+{
+  for (uint32_t i = 0; i < cnf->nClause; ++i) {
+    if (existClause(cnf, i)) {
+      return cnf->clVec[i];
+    }
+  }
+  return NULL;
 }
 
 bool isEmpty(Cnf *cnf)
@@ -111,7 +124,8 @@ bool isEmpty(Cnf *cnf)
 void showCnf(Cnf *cnf)
 {
   char display[80];
-  for (uint32_t i = 0; i < cnf->nClause; ++i) {
+  uint32_t i;
+  for (i = 0; i < cnf->nClause; ++i) {
     if (existClause(cnf, i)) {
       Clause *cl = cnf->clVec[i];
       toString(cl, display);
@@ -139,12 +153,14 @@ void restore(Cnf *cnf, CnfEdit *edit)
   Bitmap **varVec = edit->varVec;
   if (NULL == varVec)
     return;
-  for (uint32_t transformed = 0; transformed < edit->nVarPlusNOT; ++transformed) {
+  uint32_t transformed;
+  for (transformed = 0; transformed < edit->nVarPlusNOT; ++transformed) {
     if (NULL == varVec[transformed])
       continue;
     Bitmap *posMap = varVec[transformed];
     uint32_t var = FromBufferFormat(transformed);
-    for (uint32_t p = 0; p < posMap->len; ++p) {
+    uint32_t p;
+    for (p = 0; p < posMap->len; ++p) {
       if (get(posMap, p)) {
         Clause *cl = cnf->clVec[p];
         addVar(cl, var);
@@ -153,5 +169,7 @@ void restore(Cnf *cnf, CnfEdit *edit)
     }
   }
 }
+
+
 
 

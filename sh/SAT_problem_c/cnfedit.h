@@ -16,6 +16,8 @@ typedef struct
 } CnfEdit;
 
 CnfEdit* createCnfEdit(uint32_t _nClause, uint32_t _nVar);
+void destroyCnfEdit(CnfEdit *edit);
+
 void resetCnfEdit(CnfEdit *edit);
 void delClause(CnfEdit* edit, uint32_t pos);
 void delClauseVar(CnfEdit* edit, int var, uint32_t pos);

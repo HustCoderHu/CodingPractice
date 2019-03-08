@@ -14,15 +14,16 @@ typedef struct
   Clause **clVec;
 } Cnf;
 
-Cnf *createCnf();
+Cnf* createCnf();
 void destroyCnf(Cnf *cnf);
 
 void parseFile(Cnf *cnf, const char* fpath);
-static Clause* parseLine(char *buf);
+Clause* parseLine(char *buf);
 
 // 获取单子句里的变元
 bool getSimple(Cnf *cnf, int *var);
-Clause *getShortestClause(Cnf *cnf);
+Clause* getShortestClause(Cnf *cnf);
+Clause* getFirstExistClause(Cnf *cnf);
 
 // 所有子句都被简化了，解完成
 bool isEmpty(Cnf *cnf);

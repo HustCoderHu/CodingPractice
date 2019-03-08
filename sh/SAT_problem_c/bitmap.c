@@ -58,7 +58,8 @@ bool get(Bitmap *bmap, uint32_t pos)
 
 bool isAllFalse(Bitmap *bmap)
 {
-  for (uint32_t i = 0; i < bmap->ints; ++i) {
+  uint32_t i;
+  for (i = 0; i < bmap->ints; ++i) {
     if (bmap->intmap_[i] != 0)
       return false;
   }
@@ -87,14 +88,16 @@ void resize(Bitmap *bmap, uint32_t _len)
 
 void OR(Bitmap *bmap, Bitmap *other)
 {
-  for (uint32_t i = 0; i < bmap->ints && i < other->ints; ++i) {
+  uint32_t i;
+  for (i = 0; i < bmap->ints && i < other->ints; ++i) {
     bmap->intmap_[i] |= other->intmap_[i];
   }
 }
 
 void show(Bitmap *bmap)
 {
-  for (int i = bmap->ints-1; i >= 0; --i) {
+  int i;
+  for (i = bmap->ints-1; i >= 0; --i) {
     printf("%x ", bmap->intmap_[i]);
   }
 }
