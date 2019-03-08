@@ -22,7 +22,7 @@ Cnf::~Cnf()
     return;
   for (uint32_t i = 0; i < nClause; ++i) {
     if (clVec[i] != nullptr) {
-      delete clVec;
+      delete clVec[i];
     }
   }
   delete[] clVec;
@@ -101,6 +101,16 @@ Clause *Cnf::getShortestClause()
     }
   }
   return shortest;
+}
+
+Clause *Cnf::getFirstExistClause()
+{
+  for (uint32_t i = 0; i < nClause; ++i) {
+    if (existClause(i)) {
+      return clVec[i];
+    }
+  }
+  return nullptr;
 }
 
 void Cnf::show()
