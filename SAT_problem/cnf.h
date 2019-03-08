@@ -18,6 +18,7 @@ public:
   // 获取单子句里的变元
   bool getSimple(int *var);
   Clause *getShortestClause();
+  Clause *getFirstExistClause();
 
   // 所有子句都被简化了，解完成
   bool isEmpty() { return bmap->isAllFalse(); }

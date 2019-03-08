@@ -164,6 +164,7 @@ int Solver::selectVar(Cnf *cnf)
 {
   // TODO
   Clause *cl = cnf->getShortestClause();
+//  Clause *cl = cnf->getFirstExistClause();
 //  char strbuf[20];
 //  cl->toString(strbuf);
 //  printf("%s \n", strbuf);
