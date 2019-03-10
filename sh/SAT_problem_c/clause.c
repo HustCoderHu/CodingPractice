@@ -1,6 +1,6 @@
 #include "clause.h"
 
-// 缓存结构
+// 行解析时的缓存结构
 static int *varBuf = NULL;
 static uint32_t bufCapacity = 10;
 static uint32_t buffered = 0;
@@ -155,14 +155,17 @@ void toString(Clause *cl, char strbuf[])
 {
   uint32_t strlen = 0;
   uint32_t offset;
+  int addedBytes;
   for (offset = 0; offset < cl->len; ++offset) {
     if (cl->elem[offset]) {
       uint32_t transformed = cl->base + offset;
       int var = FromBufferFormat(transformed);
-      int addedBytes =  sprintf(strbuf + strlen, "%d ", var);
+      addedBytes =  sprintf(strbuf + strlen, "%d ", var);
       strlen += addedBytes;
     }
   }
+  // 结尾的 0
+  sprintf(strbuf + strlen, "0");
 }
 
 uint32_t toBufferFormat(int var)
@@ -198,7 +201,7 @@ void bufferVar(Clause *cl, int var)
   if (buffered >= bufCapacity) {
     uint32_t newCapacity = bufCapacity + (bufCapacity >> 1); // 容量 1.5 倍
     int *newBuf = (int*)malloc(sizeof(*newBuf) * newCapacity);
-    memcpy(newBuf, varBuf, buffered);
+    memcpy(newBuf, varBuf, sizeof(varBuf[0]) * buffered);
     free(varBuf);
     varBuf = newBuf;
   }

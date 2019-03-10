@@ -10,6 +10,7 @@ typedef struct
 {
   Bitmap *deletedClause;
   uint32_t nClause;
+  // 正负变量总个数
   uint32_t nVarPlusNOT;
   // varVec[trans] 记录变量 trans 从哪些子句里被移除
   Bitmap **varVec;

@@ -48,6 +48,7 @@ bool get(Bitmap *bmap, uint32_t pos)
   }
 
   uint32_t int_pos = pos >> 5; // pos / 32
+  // bit pos = pos % 32
   uint32_t bit_pos = pos & ((1 << 5) - 1); // = pos & b'0001 1111
 
   uint32_t ruler = 1 << bit_pos;

@@ -148,6 +148,7 @@ void restore(Cnf *cnf, CnfEdit *edit)
 {
   //  BitMap *deletedClause = edit->deletedClause;
   if (edit->deletedClause != NULL)
+    // 0 | 1 还原到 1
     OR(cnf->bmap, edit->deletedClause); // 还原子句的存在情况
 
   Bitmap **varVec = edit->varVec;

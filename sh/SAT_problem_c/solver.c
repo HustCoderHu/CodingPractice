@@ -42,6 +42,7 @@ bool simplize(Cnf *cnf, int var, CnfEdit *edit)
     if (existClause(cnf, pos) == false) // 子句已被简化为空
       continue;
 
+    // 改变 cnf & 记录改变
     Clause *cl = cnf->clVec[pos];
     if (contains(cl, var)) { // 子句包含变量 L ，标记满足
       markClauseExist(cnf, pos, false);
@@ -103,6 +104,7 @@ int solve(Solver *sl, Cnf *cnf)
   start = clock();
   sl->s = _solve(sl, cnf, 0);
   finish = clock();
+  // CLOCKS_PER_SEC = 1s
   sl->t = (double)(finish - start) * 1000 / CLOCKS_PER_SEC;
   return sl->s;
 }
@@ -149,15 +151,15 @@ int _solve(Solver *sl, Cnf *cnf, int var)
   //  cout << "select: " << var << endl;
   //  simplize(cnf, var, edit_branch);
   ret = _solve(sl, cnf, var);
-  if (1 == ret || -1 == ret) {
+  if (1 == ret) {
     ret = 1;
     //    cout << __LINE__ << endl;
     //    cnf->show(); cout << endl;
     goto end;
   }
-  // 还原 CNF，验证另外一条分支
+  // 验证另外一条分支
   ret = _solve(sl, cnf, -var);
-  if (1 == ret || -1 == ret) {
+  if (1 == ret) {
     ret = 1;
     goto end;
     //    cout << __LINE__ << endl;
@@ -168,6 +170,7 @@ int _solve(Solver *sl, Cnf *cnf, int var)
   // 无解
   //  cout << var << -var << endl;
 end:
+  // 还原 CNF
   restore(cnf, edit);
   destroyCnfEdit(edit);
   return ret;
@@ -200,7 +203,7 @@ bool verifyCnf(Solver *sl, Cnf *cnf)
       printf("%s\n", strbuf);
     }
   }
-  printf("Solver verify finish\n");
+  printf("######## Solver verify finish\n");
   return true;
 }
 
