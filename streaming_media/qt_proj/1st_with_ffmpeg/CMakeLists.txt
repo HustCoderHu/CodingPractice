@@ -44,7 +44,7 @@ else()
 endif()
 
 #设置ffmpeg头文件和库路径
-set(FFMPEG_PREFIX_PATH G:/softwares/media/ffmpeg-5.1.2-full_build-shared)
+set(FFMPEG_PREFIX_PATH D:/softwares/coding/ffmpeg-5.1.2-full_build-shared)
 include_directories( ${FFMPEG_PREFIX_PATH}/include )
 #find_library(AVUTIL_LIBRARY avutil)
 

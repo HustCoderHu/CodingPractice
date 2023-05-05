@@ -29,6 +29,8 @@
  * ffplay.
  */
 
+#include <QOpenGLFunctions>
+
 #define __STDC_CONSTANT_MACROS
 
 extern "C" {
@@ -96,9 +98,10 @@ static int output_video_frame(AVFrame *frame)
 static int output_audio_frame(AVFrame *frame)
 {
     size_t unpadded_linesize = frame->nb_samples * av_get_bytes_per_sample((AVSampleFormat)frame->format);
+    char timestr[AV_TS_MAX_STRING_SIZE];
+    av_ts_make_time_string(timestr, frame->pts, &audio_dec_ctx->time_base);
     printf("audio_frame n:%d nb_samples:%d pts:%s\n",
-           audio_frame_count++, frame->nb_samples,
-           av_ts2timestr(frame->pts, &audio_dec_ctx->time_base));
+           audio_frame_count++, frame->nb_samples, timestr);
 
     /* Write the raw audio data samples of the first plane. This works
      * fine for packed formats (e.g. AV_SAMPLE_FMT_S16). However,
@@ -144,9 +147,8 @@ static int decode_packet(AVCodecContext *dec, const AVPacket *pkt)
         // write the frame data to output file
         if (dec->codec->type == AVMEDIA_TYPE_VIDEO)
             ret = output_video_frame(frame);
-        else
-            ret = output_audio_frame(frame);
-
+//        else
+//            ret = output_audio_frame(frame);
         av_frame_unref(frame);
         if (ret < 0)
             return ret;
@@ -239,6 +241,7 @@ int main(int argc, char **argv)
 {
     int ret = 0;
 
+    argc = 4;
     if (argc != 4) {
         fprintf(stderr, "usage: %s  input_file video_output_file audio_output_file\n"
                         "API example program to show how to read frames from an input file.\n"
@@ -248,9 +251,12 @@ int main(int argc, char **argv)
                 argv[0]);
         exit(1);
     }
-    src_filename = argv[1];
-    video_dst_filename = argv[2];
-    audio_dst_filename = argv[3];
+    src_filename = "Z:/coding/github/aaple-realesr-animevideov3-s2.mp4";
+    video_dst_filename = "Z:/coding/github/aaple.video";
+    audio_dst_filename = "Z:/coding/github/aaple.audio";
+//    src_filename = argv[1];
+//    video_dst_filename = argv[2];
+//    audio_dst_filename = argv[3];
 
     /* open input file, and allocate format context */
     if (avformat_open_input(&fmt_ctx, src_filename, NULL, NULL) < 0) {
@@ -331,8 +337,8 @@ int main(int argc, char **argv)
         // skip it
         if (pkt->stream_index == video_stream_idx)
             ret = decode_packet(video_dec_ctx, pkt);
-        else if (pkt->stream_index == audio_stream_idx)
-            ret = decode_packet(audio_dec_ctx, pkt);
+//        else if (pkt->stream_index == audio_stream_idx)
+//            ret = decode_packet(audio_dec_ctx, pkt);
         av_packet_unref(pkt);
         if (ret < 0)
             break;
