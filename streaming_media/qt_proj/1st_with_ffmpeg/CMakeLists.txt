@@ -9,15 +9,22 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(QT_LIBS
+  Widgets
+  OpenGL
+  OpenGLWidgets
+)
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_LIBS})
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        demux_decode.cpp
+  mylog.h
+  main.cpp
+  mainwindow.cpp
+  mainwindow.h
+  mainwindow.ui
+  decoder_thread.h decoder_thread.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -58,11 +65,17 @@ FIND_LIBRARY(SWRESAMPLE_LIBRARY swresample  ${FFMPEG_PREFIX_PATH}/lib)
 FIND_LIBRARY(SWSCALE_LIBRARY swscale  ${FFMPEG_PREFIX_PATH}/lib)
 
 message(STATUS "AVCODEC_LIBRARY:"  ${AVCODEC_LIBRARY})
-
-target_link_libraries(1st_with_ffmpeg PUBLIC Qt${QT_VERSION_MAJOR}::Widgets
+set(FFMPEG_LIBS
   ${AVFILTER_LIBRARY} ${AVFORMAT_LIBRARY} ${AVCODEC_LIBRARY}
   ${AVUTIL_LIBRARY} ${AVDEVICE_LIBRARY} ${POSTPROC_LIBRARY}
-  ${SWRESAMPLE_LIBRARY} ${SWSCALE_LIBRARY})
+  ${SWRESAMPLE_LIBRARY} ${SWSCALE_LIBRARY}
+)
+set(LINK_QT_LIBS "")
+foreach(lib ${QT_LIBS})
+  list(APPEND LINK_QT_LIBS "Qt${QT_VERSION_MAJOR}::${lib}")
+endforeach()
+#Qt${QT_VERSION_MAJOR}::Widgets
+target_link_libraries(1st_with_ffmpeg PUBLIC ${LINK_QT_LIBS} ${FFMPEG_LIBS})
 
 
 #target_link_libraries(1st_with_ffmpeg )
