@@ -34,13 +34,13 @@ int DecoderThread::output_video_frame(AVFrame *frame)
         frame->format != pix_fmt_) {
         /* To handle this change, one could call av_image_alloc again and
          * decode the following frames into another rawvideo file. */
-        LOG << "Error: Width, height and pixel format have to be "
-            << "constant in a rawvideo file, but the width, height or "
-            << "pixel format of the input video changed:";
-        LOG << "old: width=" << width_ << ", height=" << height_
-            << ", format=" << av_get_pix_fmt_name(pix_fmt_);
-        LOG << "new: width=" << frame->width << ", height=" << frame->height
-            << ", format=" << av_get_pix_fmt_name((AVPixelFormat)frame->format);
+//        LOG << "Error: Width, height and pixel format have to be "
+//            << "constant in a rawvideo file, but the width, height or "
+//            << "pixel format of the input video changed:";
+//        LOG << "old: width=" << width_ << ", height=" << height_
+//            << ", format=" << av_get_pix_fmt_name(pix_fmt_);
+//        LOG << "new: width=" << frame->width << ", height=" << frame->height
+//            << ", format=" << av_get_pix_fmt_name((AVPixelFormat)frame->format);
         //        return -1;
     }
 
@@ -93,8 +93,9 @@ int DecoderThread::decode_packet(AVCodecContext *dec, const AVPacket *pkt)
             emit signal_on_avframe(*frame);
             ret = output_video_frame(frame);
 
-            if (hw_decode_ && frame->format == hw_pix_fmt_) {
+            if (false && hw_decode_ && frame->format == hw_pix_fmt_) {
                 // retrieve data from GPU to CPU
+                LOG << "video_frame_count:" << video_frame_count;
                 if ((ret = av_hwframe_transfer_data(sw_frame, frame, 0)) < 0) {
                     fprintf(stderr, "Error transferring the data to system memory\n");
                     goto fail;
@@ -102,9 +103,10 @@ int DecoderThread::decode_packet(AVCodecContext *dec, const AVPacket *pkt)
             }
 //            av_hwframe_transfer_data();
         }
-        av_frame_unref(frame);
+//        av_frame_unref(frame);
     }
-
+fail:
+//    av_frame_unref(frame);
     return 0;
 }
 
@@ -258,6 +260,7 @@ void DecoderThread::run()
         exit(1);
     }
     src_filename = "Z:/coding/github/steins_gate_cut.mkv";
+    src_filename = "D:/docs/movie/.unknown/6798973.mp4";
     //    video_dst_filename = "Z:/coding/github/steins_gate_cut.video";
     //    audio_dst_filename = "Z:/coding/github/steins_gate_cut.audio";
     //    src_filename = argv[1];
