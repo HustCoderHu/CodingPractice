@@ -3,6 +3,7 @@
 #define MAINWINDOW_H
 
 #include "decoder_thread.h"
+#include "glwidget.h"
 
 #include <QMainWindow>
 extern "C" {
@@ -10,25 +11,28 @@ extern "C" {
 }
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
-
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+  MainWindow(QWidget *parent = nullptr);
+  ~MainWindow();
 
 public slots:
-    void slots_on_avframe(const AVFrame& frame);
+  void slots_on_avframe(AVFrame *frame);
+
 
 private:
-    Ui::MainWindow *ui;
+  Ui::MainWindow *ui;
 
-    DecoderThread dec_thread_;
+  DecoderThread dec_thread_;
+  GLWidget *glwidget_;
 };
 
 #endif // MAINWINDOW_H

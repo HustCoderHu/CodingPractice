@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
   mainwindow.h
   mainwindow.ui
   decoder_thread.h decoder_thread.cpp
+  glwidget.h glwidget.cpp
+  resource.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
