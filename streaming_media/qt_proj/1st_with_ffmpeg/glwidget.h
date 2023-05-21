@@ -2,7 +2,7 @@
 #pragma once
 
 #include <QOpenGLWidget>
-//#include <QOpenGLFunctions>
+#include <QOpenGLFunctions>
 #include <QOpenGLFunctions_3_3_Core>
 #include <qopenglshaderprogram.h>
 #include <QOpenGLTexture>
@@ -11,17 +11,24 @@
 struct AVFrame;
 
 // public QOpenGLFunctions
-class GLWidget : public QOpenGLWidget, public QOpenGLFunctions_3_3_Core
+class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
   Q_OBJECT
 public:
   explicit GLWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
   ~GLWidget() override;
 
-public slots:
-  void repaint(AVFrame* frame); // 设置需要绘制的图像帧
+  void on_frame_decoded(AVFrame* frame);
+
+//  void resizeEvent(QResizeEvent *event) override {
+//    int a = 0;
+//    return;
+//  }
 
 public:
+  void repaint(AVFrame* frame); // 设置需要绘制的图像帧
+
+protected:
   void initializeGL() override;
   void resizeGL(int w, int h) override;
   void paintGL() override;

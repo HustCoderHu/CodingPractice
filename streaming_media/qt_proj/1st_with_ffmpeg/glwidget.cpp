@@ -13,7 +13,7 @@ static GLfloat vertices[] = {
     1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, // 右下
     -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // 左下
     -1.0f, 1.0f,  0.0f, 0.0f, 1.0f  // 左上
-};
+}; // @todo 不是 三角形,  应该  右上 右下 左上 左下
 static GLuint indices[] = {0, 1, 3,
                            1, 2, 3};
 
@@ -23,6 +23,8 @@ GLWidget::GLWidget(QWidget* parent, Qt::WindowFlags f)
   // 初始化视图大小，由于Shader里面有YUV转RGB的代码，会初始化显示为绿色，这里通过将视图大小设置为0避免显示绿色背景
   m_pos = QPointF(0, 0);
   m_zoomSize = QSize(0, 0);
+
+//  setMinimumSize(10, 10);
 }
 
 GLWidget::~GLWidget()
@@ -36,11 +38,13 @@ GLWidget::~GLWidget()
   // 释放
   glDeleteBuffers(1, &VBO);
   glDeleteBuffers(1, &EBO);
-  glDeleteVertexArrays(1, &VAO);
+  glDeleteVertexArrays(1, &VAO); // 3_3_Core
 }
 
 void GLWidget::repaint(AVFrame *frame)
 {
+//  update();
+
   // 如果帧长宽为0则不需要绘制
   if(!frame || frame->width == 0 || frame->height == 0) return;
 
@@ -60,7 +64,7 @@ void GLWidget::repaint(AVFrame *frame)
   default: break;
   }
 
-  av_frame_unref(frame);  //  取消引用帧引用的所有缓冲区并重置帧字段。
+//  av_frame_unref(frame);  //  取消引用帧引用的所有缓冲区并重置帧字段。
 
   this->update();
 }
@@ -87,6 +91,7 @@ void GLWidget::initializeGL()
   GLuint posAttr = GLuint(m_program->attributeLocation("aPos"));
   GLuint texCord = GLuint(m_program->attributeLocation("aTexCord"));
 
+//  3_3_Core
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
@@ -129,7 +134,7 @@ void GLWidget::initializeGL()
   // 释放
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0); // 设置为零以破坏现有的顶点数组对象绑定
-
+//3_3_Core
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // 指定颜色缓冲区的清除值(背景色)
 }
 
@@ -158,7 +163,8 @@ void GLWidget::paintGL()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // 将窗口的位平面区域（背景）设置为先前由glClearColor、glClearDepth和选择的值
-  glViewport(m_pos.x(), m_pos.y(), m_zoomSize.width(), m_zoomSize.height());  // 设置视图大小实现图片自适应
+  glViewport(m_pos.x(), m_pos.y(), m_zoomSize.width(), m_zoomSize.height());
+  // 设置视图大小实现图片自适应
 
   m_program->bind();               // 绑定着色器
   m_program->setUniformValue("format", m_format);
@@ -186,12 +192,14 @@ void GLWidget::paintGL()
     break;
   }
 
+  // 3_3_Core
   glBindVertexArray(VAO);           // 绑定VAO
 
   glDrawElements(GL_TRIANGLES,      // 绘制的图元类型
                  6,                 // 指定要渲染的元素数(点数)
                  GL_UNSIGNED_INT,   // 指定索引中值的类型(indices)
                  nullptr);          // 指定当前绑定到GL_ELEMENT_array_buffer目标的缓冲区的数据存储中数组中第一个索引的偏移量。
+//  3_3_Core
   glBindVertexArray(0);
   // 释放纹理
   switch (m_format) {
@@ -250,8 +258,8 @@ void GLWidget::initTexYUV420P(AVFrame* frame)
   {
     // 创建2D纹理
     m_texY = new QOpenGLTexture(QOpenGLTexture::Target2D);
-    m_texY->create();
-
+//    m_texY->create();
+    QOpenGLContext* ctx = context();
     // 设置纹理大小
     m_texY->setSize(frame->width, frame->height);
 //    m_texY->setSize(1920, 1080);

@@ -12,6 +12,13 @@ uniform sampler2D tex_y;
 uniform sampler2D tex_u;
 uniform sampler2D tex_v;
 
+// precision mediump float
+// out vec4 FragColor;
+
+// precision precision-qualifier​ type​;
+// precision-qualifier: highp, mediump, and lowp
+// type: float int
+
 void main()
 {
     vec3 yuv;

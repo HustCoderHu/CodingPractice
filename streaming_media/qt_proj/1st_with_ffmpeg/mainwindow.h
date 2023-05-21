@@ -2,13 +2,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "decoder_thread.h"
-#include "glwidget.h"
+//#include "decoder_thread.h"
+//#include "glwidget.h"
 
 #include <QMainWindow>
 extern "C" {
 #include <libavcodec/avcodec.h>
 }
+
+
+class ImagesPanel;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,15 +27,20 @@ public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
+  void ShowImgPanel();
+
+//  void resizeEvent(QResizeEvent *);
+
 public slots:
   void slots_on_avframe(AVFrame *frame);
-
 
 private:
   Ui::MainWindow *ui;
 
-  DecoderThread dec_thread_;
-  GLWidget *glwidget_;
+  ImagesPanel *img_panel_;
+
+//  DecoderThread dec_thread_;
+//  GLWidget *glwidget_;
 };
 
 #endif // MAINWINDOW_H

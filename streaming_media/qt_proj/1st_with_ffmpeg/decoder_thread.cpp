@@ -23,9 +23,146 @@ static uint8_t *video_dst_data[4] = {NULL};
 static int video_dst_linesize[4];
 static int video_dst_bufsize;
 
-static AVFrame *frame = NULL;
-static AVPacket *pkt = NULL;
+//static AVFrame *frame = NULL;
 static int video_frame_count = 0;
+
+DecoderThread::DecoderThread()
+{
+  if (!avpacket_)
+    avpacket_ = av_packet_alloc();
+  if (!avpacket_) {
+    LOG << "Could not allocate packet ENOMEM: " << ENOMEM;
+    //    fprintf(stderr, "Could not allocate packet\n");
+    //    ret = AVERROR(ENOMEM);
+    //    goto end;
+  }
+  avframes_mgr.Reserve(30 * 5);
+}
+
+void DecoderThread::Init(const char* file)
+{
+  video_file_ = file;
+  int ret = 0;
+
+  int argc = 4;
+  char *argv[] = {};
+  if (argc != 4) {
+    fprintf(stderr,
+            "usage: %s  input_file video_output_file audio_output_file\n"
+            "API example program to show how to read frames from an input file.\n"
+            "This program reads frames from a file, decodes them, and writes decoded\n"
+            "video frames to a rawvideo file named video_output_file, and decoded\n"
+            "audio frames to a rawaudio file named audio_output_file.\n",
+            argv[0]);
+    exit(1);
+  }
+  //  src_filename = "Z:/coding/github/steins_gate_cut.mkv";
+  src_filename = "D:/docs/movie/.unknown/6798973.mp4";
+  src_filename = video_file_;
+  //    video_dst_filename = "Z:/coding/github/steins_gate_cut.video";
+  //    audio_dst_filename = "Z:/coding/github/steins_gate_cut.audio";
+  //    src_filename = argv[1];
+  //    video_dst_filename = argv[2];
+  //    audio_dst_filename = argv[3];
+
+  /* open input file, and allocate format context */
+  if (avformat_open_input(&fmt_ctx_, src_filename, NULL, NULL) < 0) {
+    fprintf(stderr, "Could not open source file %s\n", src_filename);
+    exit(1);
+  }
+
+  /* retrieve stream information */
+  if (avformat_find_stream_info(fmt_ctx_, NULL) < 0) {
+    fprintf(stderr, "Could not find stream information\n");
+    exit(1);
+  }
+
+  LOG << "open open_codec_context video";
+  if (open_codec_context(&video_stream_idx_, &video_codec_ctx_, AVMEDIA_TYPE_VIDEO) >= 0) {
+    video_stream_ = fmt_ctx_->streams[video_stream_idx_];
+
+    //        video_dst_file = fopen(video_dst_filename, "wb");
+    //        if (!video_dst_file) {
+    //            fprintf(stderr, "Could not open destination file %s\n", video_dst_filename);
+    //            ret = 1;
+    //            goto end;
+    //        }
+
+    /* allocate image where the decoded image will be put */
+    width_ = video_codec_ctx_->width;
+    height_ = video_codec_ctx_->height;
+    pix_fmt_ = video_codec_ctx_->pix_fmt;
+    ret = av_image_alloc(video_dst_data, video_dst_linesize, width_, height_, pix_fmt_, 1);
+    if (ret < 0) {
+      fprintf(stderr, "Could not allocate raw video buffer\n");
+      goto end;
+    }
+    video_dst_bufsize = ret;
+  }
+
+  /* dump input information to stderr */
+  //    av_dump_format(fmt_ctx_, 0, src_filename, 0);
+
+  if (!video_stream_) {
+    fprintf(stderr, "Could not find video stream in the input, aborting\n");
+    ret = 1;
+    goto end;
+  }
+
+  //  frame = av_frame_alloc();
+  //  if (!frame) {
+  //    fprintf(stderr, "Could not allocate frame\n");
+  //    ret = AVERROR(ENOMEM);
+  //    goto end;
+  //  }
+
+  //  pkt = av_packet_alloc();
+  //  if (!pkt) {
+  //    fprintf(stderr, "Could not allocate packet\n");
+  //    ret = AVERROR(ENOMEM);
+  //    goto end;
+  //  }
+
+  //    if (video_stream_)
+  //        printf("Demuxing video from file '%s' into '%s'\n", src_filename, video_dst_filename);
+
+  /* read frames from the file */
+  //  while (av_read_frame(fmt_ctx_, pkt) >= 0) {
+  //    // check if the packet belongs to a stream we are interested in, otherwise
+  //    // skip it
+  //    if (pkt->stream_index == video_stream_idx_)
+  //      ret = decode_packet(video_codec_ctx_, pkt);
+
+  //    av_packet_unref(pkt);
+  //    if (ret < 0)
+  //      break;
+  //  }
+
+  /* flush the decoders */
+  //  if (video_codec_ctx_)
+  //    decode_packet(video_codec_ctx_, NULL);
+
+  printf("Demuxing succeeded.\n");
+
+//    if (video_stream_) {
+//        printf("Play the output video file with the command:\n"
+//               "ffplay -f rawvideo -pix_fmt %s -video_size %dx%d %s\n",
+//               av_get_pix_fmt_name(pix_fmt_), width_, height_,
+//               video_dst_filename);
+//    }
+
+end:
+  //  avcodec_free_context(&video_codec_ctx_);
+  //  avformat_close_input(&fmt_ctx_);
+  //  //    if (video_dst_file)
+  //  //        fclose(video_dst_file);
+  //  av_packet_free(&pkt);
+  //  av_frame_free(&frame);
+  //  av_free(video_dst_data[0]);
+
+  LOG << "ret:" << ret;
+}
+
 
 int DecoderThread::output_video_frame(AVFrame *frame)
 {
@@ -98,16 +235,16 @@ int DecoderThread::decode_packet(AVCodecContext *dec, const AVPacket *pkt)
 
     // write the frame data to output file
     if (dec->codec->type == AVMEDIA_TYPE_VIDEO) {
-      ret = output_video_frame(pframe);
-      if (true || frame->width == 1920) {
-        emit signal_on_avframe(pframe);
-        msleep(3600 * 1000);
+//      ret = output_video_frame(pframe);
+      if (true || pframe->width == 1920) {
+//        emit signal_on_avframe(pframe);
+//        msleep(3600 * 1000);
       }
 
-      if (false && hw_decode_ && frame->format == hw_pix_fmt_) {
+      if (false && hw_decode_ && pframe->format == hw_pix_fmt_) {
         // retrieve data from GPU to CPU
         LOG << "video_frame_count:" << video_frame_count;
-        if ((ret = av_hwframe_transfer_data(sw_frame, frame, 0)) < 0) {
+        if ((ret = av_hwframe_transfer_data(sw_frame, pframe, 0)) < 0) {
           fprintf(stderr, "Error transferring the data to system memory\n");
           goto fail;
         }
@@ -118,7 +255,7 @@ int DecoderThread::decode_packet(AVCodecContext *dec, const AVPacket *pkt)
     //        av_frame_unref(frame);
   }
 fail:
-  av_frame_unref(frame);
+//  av_frame_unref(pframe);
   return 0;
 }
 
@@ -249,126 +386,126 @@ int DecoderThread::get_format_from_sample_fmt(const char **fmt, enum AVSampleFor
   return -1;
 }
 
-DecoderThread::DecoderThread() {}
+uint32_t DecoderThread::emit_frames(uint32_t n)
+{
+  uint32_t frame_id;
+  AVFrame *frame = NULL;
+  uint32_t sent = 0;
+  for (; sent < n; ++sent) {
+    frame = avframes_mgr.GetDecoded(frame_id);
+    if (!frame) {
+      LOG << "avframes_mgr.GetDecoded return NULL";
+      break;
+    }
+    emit signal_frame_decoded(frame_id, frame);
+  }
+  return sent;
+}
 
-void DecoderThread::run()
+uint32_t DecoderThread::decode_and_cache(uint32_t max_cache)
 {
   int ret = 0;
-
-  int argc = 4;
-  char *argv[] = {};
-  if (argc != 4) {
-    fprintf(stderr,
-            "usage: %s  input_file video_output_file audio_output_file\n"
-            "API example program to show how to read frames from an input file.\n"
-            "This program reads frames from a file, decodes them, and writes decoded\n"
-            "video frames to a rawvideo file named video_output_file, and decoded\n"
-            "audio frames to a rawaudio file named audio_output_file.\n",
-            argv[0]);
-    exit(1);
+//  LOG << "max_cache: " << max_cache;
+  uint32_t cur_decoded_frames = avframes_mgr.DecodedFrames();
+  if (avframes_mgr.DecodedFrames() >= max_cache) {
+    goto end;
   }
-//  src_filename = "Z:/coding/github/steins_gate_cut.mkv";
-  src_filename = "D:/docs/movie/.unknown/6798973.mp4";
-  //    video_dst_filename = "Z:/coding/github/steins_gate_cut.video";
-  //    audio_dst_filename = "Z:/coding/github/steins_gate_cut.audio";
-  //    src_filename = argv[1];
-  //    video_dst_filename = argv[2];
-  //    audio_dst_filename = argv[3];
-
-  /* open input file, and allocate format context */
-  if (avformat_open_input(&fmt_ctx_, src_filename, NULL, NULL) < 0) {
-    fprintf(stderr, "Could not open source file %s\n", src_filename);
-    exit(1);
-  }
-
-  /* retrieve stream information */
-  if (avformat_find_stream_info(fmt_ctx_, NULL) < 0) {
-    fprintf(stderr, "Could not find stream information\n");
-    exit(1);
-  }
-
-  LOG << "open open_codec_context video";
-  if (open_codec_context(&video_stream_idx_, &video_codec_ctx_, AVMEDIA_TYPE_VIDEO) >= 0) {
-    video_stream_ = fmt_ctx_->streams[video_stream_idx_];
-
-    //        video_dst_file = fopen(video_dst_filename, "wb");
-    //        if (!video_dst_file) {
-    //            fprintf(stderr, "Could not open destination file %s\n", video_dst_filename);
-    //            ret = 1;
-    //            goto end;
-    //        }
-
-    /* allocate image where the decoded image will be put */
-    width_ = video_codec_ctx_->width;
-    height_ = video_codec_ctx_->height;
-    pix_fmt_ = video_codec_ctx_->pix_fmt;
-    ret = av_image_alloc(video_dst_data, video_dst_linesize, width_, height_, pix_fmt_, 1);
-    if (ret < 0) {
-      fprintf(stderr, "Could not allocate raw video buffer\n");
-      goto end;
+  char av_err_str[AV_ERROR_MAX_STRING_SIZE];
+  // read frames from the file
+  while (av_read_frame(fmt_ctx_, avpacket_) >= 0) {
+    if (avpacket_->stream_index != video_stream_idx_) {
+      av_packet_unref(avpacket_);
+      continue;
     }
-    video_dst_bufsize = ret;
-  }
-
-  /* dump input information to stderr */
-  //    av_dump_format(fmt_ctx_, 0, src_filename, 0);
-
-  if (!video_stream_) {
-    fprintf(stderr, "Could not find video stream in the input, aborting\n");
-    ret = 1;
-    goto end;
-  }
-
-  frame = av_frame_alloc();
-  if (!frame) {
-    fprintf(stderr, "Could not allocate frame\n");
-    ret = AVERROR(ENOMEM);
-    goto end;
-  }
-
-  pkt = av_packet_alloc();
-  if (!pkt) {
-    fprintf(stderr, "Could not allocate packet\n");
-    ret = AVERROR(ENOMEM);
-    goto end;
-  }
-
-  //    if (video_stream_)
-  //        printf("Demuxing video from file '%s' into '%s'\n", src_filename, video_dst_filename);
-
-  /* read frames from the file */
-  while (av_read_frame(fmt_ctx_, pkt) >= 0) {
-    // check if the packet belongs to a stream we are interested in, otherwise
-    // skip it
-    if (pkt->stream_index == video_stream_idx_)
-      ret = decode_packet(video_codec_ctx_, pkt);
-
-    av_packet_unref(pkt);
-    if (ret < 0)
+    ret = avcodec_send_packet(video_codec_ctx_, avpacket_);
+    if (ret < 0) {
+      av_make_error_string(av_err_str, AV_ERROR_MAX_STRING_SIZE, ret);
+      LOG << "Error submitting a packet for decoding: " << av_err_str;
       break;
-  }
+    }
 
-  /* flush the decoders */
-  if (video_codec_ctx_)
-    decode_packet(video_codec_ctx_, NULL);
+    AVFrame *sw_frame = NULL;
+    // get all the available frames from the decoder
+    while (ret >= 0) {
+      AVFrame *frame = avframes_mgr.GetFree();
+      ret = avcodec_receive_frame(video_codec_ctx_, frame);
+      if (ret < 0) {
+        // those two return values are special and mean there is no output
+        // frame available, but there were no errors during decoding
+        avframes_mgr.PutFree(frame);
+        if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN))
+          break;
 
-  printf("Demuxing succeeded.\n");
+        av_make_error_string(av_err_str, AV_ERROR_MAX_STRING_SIZE, ret);
+        LOG << "Error during decoding: " << av_err_str;
+        goto end;
+      }
+      if (video_codec_ctx_->codec->type != AVMEDIA_TYPE_VIDEO) {
+        av_frame_unref(frame);
+        avframes_mgr.PutFree(frame);
+        continue;
+      }
+//      ret = output_video_frame(frame);
+      if (true || frame->width == 1920) {
+        //        emit signal_on_avframe(pframe);
+        //        msleep(3600 * 1000);
+      }
 
-  //    if (video_stream_) {
-  //        printf("Play the output video file with the command:\n"
-  //               "ffplay -f rawvideo -pix_fmt %s -video_size %dx%d %s\n",
-  //               av_get_pix_fmt_name(pix_fmt_), width_, height_,
-  //               video_dst_filename);
-  //    }
-
+      if (false && hw_decode_ && frame->format == hw_pix_fmt_) {
+        // retrieve data from GPU to CPU
+        LOG << "video_frame_count:" << video_frame_count;
+        if ((ret = av_hwframe_transfer_data(sw_frame, frame, 0)) < 0) {
+          fprintf(stderr, "Error transferring the data to system memory\n");
+          goto end;
+        }
+      }
+      avframes_mgr.PutDecoded(frame);
+      if (avframes_mgr.DecodedFrames() >= max_cache)
+        goto end;
+    }
+    //    av_packet_unref(avpacket_);
+  } // end  while (av_read_frame
 end:
+  if (cur_decoded_frames < avframes_mgr.DecodedFrames())
+    LOG << "decoded frames: "
+        << cur_decoded_frames << " -> " << avframes_mgr.DecodedFrames();
+  return avframes_mgr.DecodedFrames();
+}
+
+void DecoderThread::on_require_frames(uint32_t n)
+{
+  uint32_t sent = emit_frames(n);
+  if (sent == n)
+    return;
+
+  uint32_t need_decode_frames = n - sent;
+  avframes_mgr.Reserve(need_decode_frames);
+
+  decode_and_cache(need_decode_frames);
+
+  emit_frames(need_decode_frames);
+}
+
+void DecoderThread::on_frame_consumed(AVFrame* avframe)
+{
+  LOG << avframe;
+  av_frame_unref(avframe);
+  avframes_mgr.PutFree(avframe);
+}
+
+void DecoderThread::on_timer()
+{
+  LOG << avframes_mgr.Stat().c_str();
+  decode_and_cache(max_cache_decoded_frames_);
+}
+
+void DecoderThread::on_signal_exit()
+{
   avcodec_free_context(&video_codec_ctx_);
   avformat_close_input(&fmt_ctx_);
   //    if (video_dst_file)
   //        fclose(video_dst_file);
-  av_packet_free(&pkt);
-  av_frame_free(&frame);
+  av_packet_free(&avpacket_);
+//  av_frame_free(&frame);
   av_free(video_dst_data[0]);
-
-  LOG << "ret:" << ret;
 }
